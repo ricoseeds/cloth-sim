@@ -1,4 +1,15 @@
-
+//-----------------------------------------------------------------------------
+// lighting_dir_point_spot.frag by Steve Jones 
+// Copyright (c) 2015-2019 Game Institute. All Rights Reserved.
+//
+// Fragment shader for multiple lights
+//
+// NOTE:
+// This is not the most effient shader code but it gets the point across
+// and should be easy to follow.  The same diffuse and specular calculations 
+// are completed 3 separate times.  This can be optimized to be calculated
+// only once with attenuation and spotlight multipliers applied.
+//-----------------------------------------------------------------------------
 #version 330 core
 
 struct Material 
@@ -46,7 +57,7 @@ struct SpotLight
 };
 
   
-//in vec2 TexCoord;
+in vec2 TexCoord;
 in vec3 FragPos;
 in vec3 Normal;
 
@@ -64,12 +75,16 @@ vec3 calcDirectionalLightColor(DirectionalLight light, vec3 normal, vec3 viewDir
 vec3 calcPointLightColor(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
 vec3 calcSpotLightColor(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
 
+//-----------------------------------------------------------------------------------------------
+// Main Shader Entry
+//-----------------------------------------------------------------------------------------------
 void main()
 { 
 	vec3 normal = normalize(Normal);  
 	vec3 viewDir = normalize(viewPos - FragPos);
 
-	vec3 ambient = spotLight.ambient * material.ambient;// * vec3(texture(material.diffuseMap, TexCoord)) ;
+    // Ambient ----------------------------------------------------------------------------------
+	vec3 ambient = spotLight.ambient * material.ambient * vec3(texture(material.diffuseMap, TexCoord));
 	vec3 outColor = vec3(0.0f);	
 
 	outColor += calcDirectionalLightColor(sunLight, normal, viewDir);
@@ -81,16 +96,20 @@ void main()
 	if (spotLight.on == 1)
 		outColor += calcSpotLightColor(spotLight, normal, FragPos, viewDir);
 
-	frag_color = vec4(ambient + outColor , 1.0f);
+	frag_color = vec4(ambient + outColor, 1.0f);
 }
 
+//-----------------------------------------------------------------------------------------------
+// Calculate the direction light effect and return the resulting 
+// diffuse and specular color summation
+//-----------------------------------------------------------------------------------------------
 vec3 calcDirectionalLightColor(DirectionalLight light, vec3 normal, vec3 viewDir)
 {
 	vec3 lightDir = normalize(-light.direction);  // negate => Must be a direction from fragment towards the light
 
 	// Diffuse ------------------------------------------------------------------------- --------
     float NdotL = max(dot(normal, lightDir), 0.0);
-    vec3 diffuse = light.diffuse * NdotL; // * vec3(texture(material.diffuseMap, TexCoord));
+    vec3 diffuse = light.diffuse * NdotL * vec3(texture(material.diffuseMap, TexCoord));
     
      // Specular - Blinn-Phong ------------------------------------------------------------------
 	vec3 halfDir = normalize(lightDir + viewDir);
@@ -100,13 +119,16 @@ vec3 calcDirectionalLightColor(DirectionalLight light, vec3 normal, vec3 viewDir
 	return (diffuse + specular);
 }
 
+//-----------------------------------------------------------------------------------------------
+// Calculate the point light effect and return the resulting diffuse and specular color summation
+//-----------------------------------------------------------------------------------------------
 vec3 calcPointLightColor(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
 {
 	vec3 lightDir = normalize(light.position - fragPos);
 
 	// Diffuse ----------------------------------------------------------------------------------
     float NdotL = max(dot(normal, lightDir), 0.0);
-    vec3 diffuse = light.diffuse * NdotL * vec3(1.0, 0.0, 0.0);// * vec3(texture(material.diffuseMap, TexCoord));
+    vec3 diffuse = light.diffuse * NdotL * vec3(texture(material.diffuseMap, TexCoord));
     
      // Specular - Blinn-Phong ------------------------------------------------------------------
 	vec3 halfDir = normalize(lightDir + viewDir);
@@ -123,6 +145,9 @@ vec3 calcPointLightColor(PointLight light, vec3 normal, vec3 fragPos, vec3 viewD
 	return (diffuse + specular);
 }
 
+//------------------------------------------------------------------------------------------------
+// Calculate the spotlight effect and return the resulting // diffuse and specular color summation
+//------------------------------------------------------------------------------------------------
 vec3 calcSpotLightColor(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
 {
 	vec3 lightDir = normalize(light.position - fragPos);
@@ -133,7 +158,7 @@ vec3 calcSpotLightColor(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir
 
 	// Diffuse ----------------------------------------------------------------------------------
     float NdotL = max(dot(normal, lightDir), 0.0);
-    vec3 diffuse = spotLight.diffuse * NdotL * vec3(1.0, 0.0, 0.0); // * vec3(texture(material.diffuseMap, TexCoord));
+    vec3 diffuse = spotLight.diffuse * NdotL * vec3(texture(material.diffuseMap, TexCoord));
     
      // Specular - Blinn-Phong ------------------------------------------------------------------
 	vec3 halfDir = normalize(lightDir + viewDir);

@@ -11,6 +11,7 @@ public:
     {
         size = n;
         connx.resize(n * n, n * n);
+        connx.setZero(n * n, n * n);
     }
     void build_connections();
     MatrixXd get_mat()

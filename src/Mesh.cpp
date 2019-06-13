@@ -11,11 +11,11 @@ Mesh::Mesh()
 {
 }
 
-Mesh::~Mesh()
-{
-    glDeleteVertexArrays(1, &mVAO);
-    glDeleteBuffers(1, &mVBO);
-}
+// Mesh::~Mesh()
+// {
+//     glDeleteVertexArrays(1, &mVAO);
+//     glDeleteBuffers(1, &mVBO);
+// }
 
 bool Mesh::loadOBJ(const std::string &filename, bool liv_flag)
 {
@@ -206,15 +206,50 @@ bool Mesh::loadOBJ(const std::string &filename, bool liv_flag)
     // We shouldn't get here so return failure
     return false;
 }
+void Mesh::genCloth(int n)
+{
+    n += 1;
+    int n_squared = n * n;
+    double y_max = 10.0f, y_step = 1.0f;
+    // Vertex meshVertex;
+    int k = 0, c = 0;
+    for (size_t i = 0; i < n; i++)
+    {
+        for (size_t j = 0; j < n; j++)
+        {
+            m_positions.push_back(glm::vec3((double)j, y_max, 0.0));
+            // Index of triangle 1
+            if ((j + 1) % n != 0 && c < n_squared - n)
+            {
+                vertexIndices.push_back(k);
+                vertexIndices.push_back(k + n);
+                vertexIndices.push_back(k + n + 1);
+                std::cout << "f " << k + 1 << " " << k + n + 1 << " " << k + n + 1 + 1 << "\n";
+                // Index of triangle 2
+                vertexIndices.push_back(k);
+                vertexIndices.push_back(k + n + 1);
+                vertexIndices.push_back(k + 1);
+                std::cout << "f " << k + 1 << " " << k + n + 1 + 1 << " " << k + 1 + 1 << "\n";
+                k += 1;
+            }
+            else
+            {
+                k += 1;
+            }
+            c++;
+        }
+        y_max -= y_step;
+    }
+    for (size_t i = 0; i < m_positions.size(); i++)
+    {
+        std::cout << "v " << m_positions[i].x << " " << m_positions[i].y << " " << m_positions[i].z << "\n";
+    }
 
-//-----------------------------------------------------------------------------
-// Create and initialize the vertex buffer and vertex array object
-// Must have valid, non-empty std::vector of Vertex objects.
-//-----------------------------------------------------------------------------
+    // initBuffers();
+    mLoaded = true;
+}
 void Mesh::initBuffers()
 {
-    // std::cout << "vErt0" << glm::to_string(tempVertices[0]) << std::endl;
-    std::cout << "FACE " << vertexIndices[0] << vertexIndices[1] << vertexIndices[2] << std::endl;
     glGenVertexArrays(1, &mVAO);
     glGenBuffers(1, &mVBO);
     glGenBuffers(1, &mVBO_norm);

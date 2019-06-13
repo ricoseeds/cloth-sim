@@ -14,4 +14,16 @@ private:
     glm::vec3 external_force;
     glm::vec3 total_force;
     double mass;
+    bool fixed;
+
+public:
+    Particle()
+    {
+        fixed = false;
+        mass = 1.0f;
+    }
+    void toggle_fixed()
+    {
+        fixed = !fixed;
+    }
 };

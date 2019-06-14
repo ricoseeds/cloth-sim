@@ -18,7 +18,7 @@ class Mesh
 {
 public:
     Mesh();
-    // ~Mesh();
+    ~Mesh();
     bool loadOBJ(const std::string &filename, bool liv_flag);
     void genCloth(int n);
     void draw();

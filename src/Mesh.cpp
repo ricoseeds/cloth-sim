@@ -11,11 +11,11 @@ Mesh::Mesh()
 {
 }
 
-// Mesh::~Mesh()
-// {
-//     glDeleteVertexArrays(1, &mVAO);
-//     glDeleteBuffers(1, &mVBO);
-// }
+Mesh::~Mesh()
+{
+    glDeleteVertexArrays(1, &mVAO);
+    glDeleteBuffers(1, &mVBO);
+}
 
 bool Mesh::loadOBJ(const std::string &filename, bool liv_flag)
 {
@@ -217,19 +217,19 @@ void Mesh::genCloth(int n)
     {
         for (size_t j = 0; j < n; j++)
         {
-            m_positions.push_back(glm::vec3((double)j, y_max, 0.0));
+            tempVertices.push_back(glm::vec3((double)j, y_max, 0.0));
             // Index of triangle 1
             if ((j + 1) % n != 0 && c < n_squared - n)
             {
                 vertexIndices.push_back(k);
                 vertexIndices.push_back(k + n);
                 vertexIndices.push_back(k + n + 1);
-                std::cout << "f " << k + 1 << " " << k + n + 1 << " " << k + n + 1 + 1 << "\n";
+                // std::cout << "f " << k + 1 << " " << k + n + 1 << " " << k + n + 1 + 1 << "\n";
                 // Index of triangle 2
                 vertexIndices.push_back(k);
                 vertexIndices.push_back(k + n + 1);
                 vertexIndices.push_back(k + 1);
-                std::cout << "f " << k + 1 << " " << k + n + 1 + 1 << " " << k + 1 + 1 << "\n";
+                // std::cout << "f " << k + 1 << " " << k + n + 1 + 1 << " " << k + 1 + 1 << "\n";
                 k += 1;
             }
             else
@@ -240,12 +240,35 @@ void Mesh::genCloth(int n)
         }
         y_max -= y_step;
     }
-    for (size_t i = 0; i < m_positions.size(); i++)
+    // Generate Vertex normals
+    for (int i = 0; i != tempVertices.size(); i++)
     {
-        std::cout << "v " << m_positions[i].x << " " << m_positions[i].y << " " << m_positions[i].z << "\n";
+        v_normal.push_back(glm::vec3(0.0f, 0.0f, 0.0f));
+    }
+    for (unsigned int i = 0; i < vertexIndices.size(); i += 3)
+    {
+        //i (i+1) (i+2) are the three faces of a triangle
+        glm::vec3 A = tempVertices[vertexIndices[i]];
+        glm::vec3 B = tempVertices[vertexIndices[i + 1]];
+        glm::vec3 C = tempVertices[vertexIndices[i + 2]];
+        glm::vec3 AB = B - A;
+        glm::vec3 AC = C - A;
+        // glm::vec3 ABxAC = glm::normalize(glm::cross(AB, AC));
+        glm::vec3 ABxAC = glm::cross(AB, AC);
+        // std::cout << glm::to_string(ABxAC) << std::endl;
+        v_normal[vertexIndices[i]] += ABxAC;
+        v_normal[vertexIndices[i + 1]] += ABxAC;
+        v_normal[vertexIndices[i + 2]] += ABxAC;
+    }
+    for (int i = 0; i != v_normal.size(); i++)
+    {
+
+        // glm::vec3 normal = v_normal[vertexIndices[i]];
+        v_normal[i] = glm::normalize(-v_normal[i]);
+        std::cout << glm::to_string(v_normal[i]) << " \n";
     }
 
-    // initBuffers();
+    initBuffers();
     mLoaded = true;
 }
 void Mesh::initBuffers()

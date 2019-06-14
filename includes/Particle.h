@@ -1,3 +1,6 @@
+#ifndef PARTICLE_H
+#define PARTICLE_H
+
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #define GLM_ENABLE_EXPERIMENTAL
@@ -17,13 +20,7 @@ private:
     bool fixed;
 
 public:
-    Particle()
-    {
-        fixed = false;
-        mass = 1.0f;
-    }
-    void toggle_fixed()
-    {
-        fixed = !fixed;
-    }
+    Particle();
+    void toggle_fixed();
 };
+#endif

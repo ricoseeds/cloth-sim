@@ -1,3 +1,6 @@
+#ifndef GRIDIFY_H
+#define GRIDIFY_H
+
 #include <Eigen/Dense>
 using namespace Eigen;
 class Gridify
@@ -19,3 +22,4 @@ public:
         return connx;
     }
 };
+#endif

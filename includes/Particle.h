@@ -23,14 +23,38 @@ private:
 public:
     Particle(glm::vec3 pos);
     void toggle_fixed();
-    void add_spring(int from, int to, double spring_const);
+    void add_spring(int, int, double, double);
     glm::vec3 get_position()
     {
         return position;
     }
+    glm::vec3 set_position(double deltaT)
+    {
+        position = position + (velocity * (float)(deltaT));
+    }
+    glm::vec3 get_velocity()
+    {
+        return velocity;
+    }
+    void set_velocity(glm::vec3 force, double deltaT)
+    {
+        velocity = velocity + (force * (float)((1 / mass) * deltaT));
+    }
     int get_spring_count()
     {
         return springs.size();
+    }
+    int get_spring_destination(int index)
+    {
+        return springs[index].get_destination();
+    }
+    glm::vec3 calc_force_on_particle(int index, glm::vec3 xa, glm::vec3 xb)
+    {
+        return springs[index].calculate_spring_force(xa, xb, mass, velocity);
+    }
+    bool is_fixed()
+    {
+        return fixed;
     }
 };
 #endif

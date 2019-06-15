@@ -23,7 +23,8 @@ public:
     void genCloth(int n);
     void draw();
     void recomputeNormals();
-    void updateVertices(std::vector<glm::vec3> &);
+    void online_update_vertices(glm::vec3 ver);
+    void clear_vertices();
     std::vector<glm::vec3> get_positions();
 
 private:

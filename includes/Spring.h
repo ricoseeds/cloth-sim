@@ -8,7 +8,7 @@
 #ifndef SPRING_H
 #define SPRING_H
 
-// Total force = mg − ks(‖x‖ − l0) e − kd(v · e) e + fuser
+// tal force = mg − ks(‖x‖ − l0) e − kd(v · e) e + fuser
 class Spring
 {
 private:
@@ -18,7 +18,15 @@ private:
     int orig, dest;
 
 public:
-    Spring(int from, int to, double spring_const);
+    Spring(int, int, double, double);
     glm::vec3 calculate_spring_force(glm::vec3 xa, glm::vec3 xb, double mass, glm::vec3 velocity);
+    int get_destination()
+    {
+        return dest;
+    }
+    int get_origin()
+    {
+        return orig;
+    }
 };
 #endif

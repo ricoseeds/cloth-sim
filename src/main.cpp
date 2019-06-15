@@ -35,13 +35,14 @@ int main()
             {
                 if (conn(particle_count, k) > 0)
                 {
-                    particle.add_spring(particle_count, k, conn(particle_count, k));
+                    particle.add_spring(particle_count, k, conn(particle_count, k), 10.0f);
                 }
             }
             particles.push_back(particle);
             particle_count++;
         }
     }
+    particle_positions.clear();
 
     // RENDERING
     ShaderProgram lightingShader;
@@ -51,22 +52,44 @@ int main()
     const int numModels = 1;
     Texture2D texture[numModels];
 
-    // mesh[0].loadOBJ("model/sphere.obj", false);
     texture[0].loadTexture("texture/solid.jpg", true);
 
     double lastTime = glfwGetTime();
     double elapsedChrono;
     double currentChrono;
+    double delta = 0.0003f;
+    glm::vec3 acc_force;
     while (!glfwWindowShouldClose(gWindow))
     {
         static double previousChrono = 0.0;
         currentChrono = glfwGetTime();
         elapsedChrono = currentChrono - previousChrono;
-        if (elapsedChrono >= 1.0)
+        if (elapsedChrono >= delta)
         {
+            // vnew = v + f(x, v) / m ∆t
+            // xnew = x + vnew ∆t
+            mesh.clear_vertices();
             previousChrono = currentChrono;
-            std::cout << "tick\n";
+            for (size_t i = 0; i < particles.size(); i++)
+            {
+                acc_force = glm::vec3(0.0, 0.0, 0.0);
+                glm::vec3 current_position = particles[i].get_position();
+                if (!particles[i].is_fixed())
+                {
+                    for (size_t j = 0; j < particles[i].get_spring_count(); j++)
+                    {
+                        glm::vec3 connected_particle_position = particles[particles[i].get_spring_destination(j)].get_position();
+                        acc_force += particles[i].calc_force_on_particle(j, current_position, connected_particle_position);
+                    }
+                }
+                particles[i].set_velocity(acc_force, delta);
+                particles[i].set_position(delta);
+                mesh.online_update_vertices(particles[i].get_position());
+            }
+
+            // std::cout << "tick\n";
         }
+        mesh.recomputeNormals();
         showFPS(gWindow);
         double currentTime = glfwGetTime();
         double deltaTime = currentTime - lastTime;

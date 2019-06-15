@@ -8,7 +8,7 @@ int main()
         std::cerr << "GLFW initialization failed" << std::endl;
         return -1;
     }
-    int n = 10; // n_squared number of particles in the mass spring system
+    int n = 5; // n_squared number of particles in the mass spring system
     Gridify *grid;
     grid = new Gridify(n);
     grid->build_connections();
@@ -57,7 +57,7 @@ int main()
     double lastTime = glfwGetTime();
     double elapsedChrono;
     double currentChrono;
-    double delta = 0.0003f;
+    double delta = 0.009f;
     glm::vec3 acc_force;
     while (!glfwWindowShouldClose(gWindow))
     {

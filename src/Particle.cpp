@@ -3,7 +3,7 @@
 Particle::Particle(glm::vec3 pos)
 {
     fixed = false;
-    mass = 1.0f;
+    mass = 0.2f;
     position = pos;
     velocity = glm::vec3(0.0, 0.0, 0.0);
     total_force = glm::vec3(0.0, 0.0, 0.0);

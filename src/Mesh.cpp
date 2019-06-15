@@ -208,7 +208,7 @@ bool Mesh::loadOBJ(const std::string &filename, bool liv_flag)
 }
 void Mesh::genCloth(int n)
 {
-    n += 1;
+    // n += 1;
     int n_squared = n * n;
     double y_max = 10.0f, y_step = 1.0f;
     // Vertex meshVertex;

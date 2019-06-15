@@ -11,3 +11,7 @@ void Particle::toggle_fixed()
 {
     fixed = !fixed;
 }
+void Particle::add_spring(Spring *spring)
+{
+    springs.push_back(spring);
+}

@@ -217,6 +217,8 @@ void Mesh::genCloth(int n)
     {
         for (size_t j = 0; j < n; j++)
         {
+            // tempVertices.push_back(glm::vec3((double)j, y_max, 0.0));
+
             // ROTATED ALL POINTS TO BRING IT ZX PLANE
             tempVertices.push_back(glm::vec3(glm::rotate(glm::mat4(1.0), glm::radians((float)(-120.0f)), glm::vec3(1.0f, 0.0f, 0.0f)) * glm::vec4((double)j, y_max, 0.0, 1.0)));
             // Index of triangle 1
@@ -346,6 +348,11 @@ void Mesh::draw()
     // glBindBuffer(GL_ELEMEsNT_ARRAY_BUFFER, mEBO);
     glDrawElements(GL_TRIANGLES, vertexIndices.size(), GL_UNSIGNED_INT, (void *)0);
     glBindVertexArray(0);
+}
+
+std::vector<glm::vec3> Mesh::get_positions()
+{
+    return tempVertices;
 }
 
 std::vector<std::string> split(std::string s, std::string t)

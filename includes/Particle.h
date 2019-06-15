@@ -16,12 +16,21 @@ private:
     glm::vec3 position;
     glm::vec3 velocity;
     glm::vec3 total_force;
-    std::vector<Spring> springs;
+    std::vector<Spring *> springs;
     double mass;
     bool fixed;
 
 public:
     Particle(glm::vec3 pos);
     void toggle_fixed();
+    void add_spring(Spring *spring);
+    glm::vec3 get_position()
+    {
+        return position;
+    }
+    int get_spring_count()
+    {
+        springs.size();
+    }
 };
 #endif

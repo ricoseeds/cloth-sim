@@ -18,7 +18,7 @@ private:
     int orig, dest;
 
 public:
-    Spring(int from, int to);
+    Spring(int from, int to, double spring_const);
     glm::vec3 calculate_spring_force(glm::vec3 xa, glm::vec3 xb, double mass, glm::vec3 velocity);
 };
 #endif

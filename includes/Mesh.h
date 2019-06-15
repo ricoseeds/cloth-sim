@@ -24,10 +24,7 @@ public:
     void draw();
     void recomputeNormals();
     void updateVertices(std::vector<glm::vec3> &);
-    std::vector<glm::vec3> get_positions()
-    {
-        return tempVertices;
-    }
+    std::vector<glm::vec3> get_positions();
 
 private:
     void

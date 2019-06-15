@@ -1,6 +1,4 @@
 #include "../includes/main.h"
-// #include <glm/ext.hpp>
-// #include <glm/gtx/norm.hpp>
 #include "glm/gtx/string_cast.hpp"
 int main()
 {
@@ -15,18 +13,42 @@ int main()
     grid = new Gridify(n);
     grid->build_connections();
     MatrixXd conn = grid->get_mat();
+    // std::cout << conn << std::endl;
     Mesh mesh;
     mesh.genCloth(n);
-    mesh.get_positions();
-    // std::cout << "ROWCOL : " << conn.cols() << " " << conn.rows();
-    // for (size_t i = 0; i < conn.rows(); i++)
-    // {
-    //     for (size_t j = 0; j < conn.cols(); j++)
-    //     {
-    //         std::cout << conn(i, j) << " ";
-    //     }
-    //     std::cout << "\n";
-    // }
+    std::vector<glm::vec3> particle_positions = mesh.get_positions();
+
+    std::vector<Particle> particles;
+    int particle_count = 0;
+    for (size_t i = 0; i < n; i++)
+    {
+        for (size_t j = 0; j < n; j++)
+        {
+            Particle particle(particle_positions[particle_count]);
+            if ((i == 0 && j == 0) || (i == 0 && j == n - 1)) // for the fixed locations in the particle system
+            {
+                particle.toggle_fixed();
+            }
+            for (size_t k = 0; k < conn.cols(); k++)
+            {
+                if (conn(particle_count, k) > 0)
+                {
+                    // std::cout << conn(particle_count, k);
+                    // Spring spring(particle_count, k, conn(particle_count, k));
+                    Spring spring = new Spring(new Spring(particle_count, k, conn(particle_count, k)));
+                    particle.add_spring((Spring *)spring);
+                }
+            }
+            std::cout << "SPRING COUNT OF " << particle_count << "th parthicle = " << particle.get_spring_count() << " \n";
+            particles.push_back(particle);
+            particle_count++;
+        }
+    }
+    for (size_t i = 0; i < particles.size(); i++)
+    {
+        std::cout << " PARTICLE " << i << " POSITION : " << glm::to_string(particles[i].get_position()) << "\n";
+        std::cout << particles[i].get_spring_count() << "\n";
+    }
 
     //OK
     // Mesh mesh;

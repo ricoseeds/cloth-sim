@@ -1,8 +1,8 @@
 #include "../includes/Spring.h"
 
-Spring::Spring(int from, int to)
+Spring::Spring(int from, int to, double spring_const)
 {
-    ks = 2.0f;
+    ks = spring_const;
     kd = 1.0f;
     l0 = 1.0f;
     orig = from;

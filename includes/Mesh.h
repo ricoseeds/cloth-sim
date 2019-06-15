@@ -22,11 +22,19 @@ public:
     bool loadOBJ(const std::string &filename, bool liv_flag);
     void genCloth(int n);
     void draw();
+    void recomputeNormals();
+    void updateVertices(std::vector<glm::vec3> &);
+    std::vector<glm::vec3> get_positions()
+    {
+        return tempVertices;
+    }
 
 private:
-    void initBuffers();
+    void
+    initBuffers();
 
     bool mLoaded;
+    int gridsize;
     std::vector<Vertex> mVertices;
     GLuint mVBO, mVAO;
     GLuint mVBO_norm;

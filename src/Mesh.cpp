@@ -217,7 +217,8 @@ void Mesh::genCloth(int n)
     {
         for (size_t j = 0; j < n; j++)
         {
-            tempVertices.push_back(glm::vec3((double)j, y_max, 0.0));
+            // ROTATED ALL POINTS TO BRING IT ZX PLANE
+            tempVertices.push_back(glm::vec3(glm::rotate(glm::mat4(1.0), glm::radians((float)(-120.0f)), glm::vec3(1.0f, 0.0f, 0.0f)) * glm::vec4((double)j, y_max, 0.0, 1.0)));
             // Index of triangle 1
             if ((j + 1) % n != 0 && c < n_squared - n)
             {
@@ -264,12 +265,46 @@ void Mesh::genCloth(int n)
     {
 
         // glm::vec3 normal = v_normal[vertexIndices[i]];
-        v_normal[i] = glm::normalize(-v_normal[i]);
-        std::cout << glm::to_string(v_normal[i]) << " \n";
+        v_normal[i] = glm::normalize(v_normal[i]);
+        // std::cout << glm::to_string(v_normal[i]) << " \n";
     }
 
+    gridsize = tempVertices.size();
     initBuffers();
     mLoaded = true;
+}
+void Mesh::updateVertices(std::vector<glm::vec3> &updated_pos)
+{
+    tempVertices.clear();
+    for (int i = 0; i != gridsize; i++)
+    {
+        tempVertices.push_back(updated_pos[i]);
+    }
+}
+void Mesh::recomputeNormals()
+{
+    // work with updated tempvertices
+    v_normal.clear();
+    for (int i = 0; i != gridsize; i++)
+    {
+        v_normal.push_back(glm::vec3(0.0f, 0.0f, 0.0f));
+    }
+    for (unsigned int i = 0; i < vertexIndices.size(); i += 3)
+    {
+        //i (i+1) (i+2) are the three faces of a triangle
+        glm::vec3 A = tempVertices[vertexIndices[i]];
+        glm::vec3 B = tempVertices[vertexIndices[i + 1]];
+        glm::vec3 C = tempVertices[vertexIndices[i + 2]];
+        glm::vec3 AB = B - A;
+        glm::vec3 AC = C - A;
+        // glm::vec3 ABxAC = glm::normalize(glm::cross(AB, AC));
+        glm::vec3 ABxAC = glm::cross(AB, AC);
+        // std::cout << glm::to_string(ABxAC) << std::endl;
+        v_normal[vertexIndices[i]] += ABxAC;
+        v_normal[vertexIndices[i + 1]] += ABxAC;
+        v_normal[vertexIndices[i + 2]] += ABxAC;
+    }
+    initBuffers();
 }
 void Mesh::initBuffers()
 {
@@ -280,38 +315,20 @@ void Mesh::initBuffers()
 
     glBindVertexArray(mVAO);
     glBindBuffer(GL_ARRAY_BUFFER, mVBO);
-    glBufferData(GL_ARRAY_BUFFER, tempVertices.size() * sizeof(glm::vec3), &tempVertices[0], GL_STATIC_DRAW);
-
-    // glGenBuffers(1, &mVBO_norm);
-    // glBindBuffer(GL_ARRAY_BUFFER, mVBO_norm);
-    // glBufferData(GL_ARRAY_BUFFER, test_normals.size() * sizeof(glm::vec3), &test_normals[0], GL_STATIC_DRAW);
-
+    glBufferData(GL_ARRAY_BUFFER, gridsize * sizeof(glm::vec3), &tempVertices[0], GL_STATIC_DRAW);
     // Vertex Positions
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid *)0);
     glEnableVertexAttribArray(0);
-
-    // // Normals attribute
-    // glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid *)(3 * sizeof(GLfloat)));
-    // glEnableVertexAttribArray(1);
-
     // Vertex Texture Coords
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid *)(6 * sizeof(GLfloat)));
     glEnableVertexAttribArray(2);
-
     // Normals attribute
     glBindBuffer(GL_ARRAY_BUFFER, mVBO_norm);
-    glBufferData(GL_ARRAY_BUFFER, v_normal.size() * sizeof(glm::vec3), &v_normal[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, gridsize * sizeof(glm::vec3), &v_normal[0], GL_STATIC_DRAW);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid *)0);
     glEnableVertexAttribArray(1);
-
-    // glGenBuffers(1, &mEBO);
+    //Bind index buf
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mEBO);
-    //reduce vert ind by 1
-    // for (size_t i = 0; i < vertexIndices.size(); i++)
-    // {
-    // 	vertexIndices[i] -= 1;
-    // }
-
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, vertexIndices.size() * sizeof(unsigned int), &vertexIndices[0], GL_STATIC_DRAW);
     // unbind to make sure other code does not change it somewhere else
     glBindVertexArray(0);

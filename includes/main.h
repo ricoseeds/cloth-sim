@@ -20,8 +20,8 @@ using namespace Eigen;
 
 // Global Variables
 OrbitCamera orbitCamera;
-float gRadius = 1.0f;
-float gYaw = 0.0f;
+float gRadius = 4.0f;
+float gYaw = -2.0f;
 float gPitch = 0.0f;
 float gModelYaw = 0.0f;
 float gModelPitch = 0.0f;

@@ -10,12 +10,7 @@ private:
     MatrixXd connx;
 
 public:
-    Gridify(int n)
-    {
-        size = n;
-        connx.resize(n * n, n * n);
-        connx.setZero(n * n, n * n);
-    }
+    Gridify(int n);
     void build_connections();
     MatrixXd get_mat()
     {

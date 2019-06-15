@@ -7,20 +7,21 @@
 #include "glm/gtx/string_cast.hpp"
 #include "glm/gtx/norm.hpp"
 #include <glm/gtc/type_ptr.hpp>
+#include "../includes/Spring.h"
+#include <vector>
 
 class Particle
 {
 private:
     glm::vec3 position;
     glm::vec3 velocity;
-    glm::vec3 internal_force;
-    glm::vec3 external_force;
     glm::vec3 total_force;
+    std::vector<Spring> springs;
     double mass;
     bool fixed;
 
 public:
-    Particle();
+    Particle(glm::vec3 pos);
     void toggle_fixed();
 };
 #endif

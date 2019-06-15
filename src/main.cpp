@@ -24,6 +24,7 @@ int main()
     {
         for (size_t j = 0; j < n; j++)
         {
+            // Particle *particle = new Particle(particle_positions[particle_count]);
             Particle particle(particle_positions[particle_count]);
             if ((i == 0 && j == 0) || (i == 0 && j == n - 1)) // for the fixed locations in the particle system
             {
@@ -33,21 +34,12 @@ int main()
             {
                 if (conn(particle_count, k) > 0)
                 {
-                    // std::cout << conn(particle_count, k);
-                    // Spring spring(particle_count, k, conn(particle_count, k));
-                    Spring spring = new Spring(new Spring(particle_count, k, conn(particle_count, k)));
-                    particle.add_spring((Spring *)spring);
+                    particle.add_spring(particle_count, k, conn(particle_count, k));
                 }
             }
-            std::cout << "SPRING COUNT OF " << particle_count << "th parthicle = " << particle.get_spring_count() << " \n";
             particles.push_back(particle);
             particle_count++;
         }
-    }
-    for (size_t i = 0; i < particles.size(); i++)
-    {
-        std::cout << " PARTICLE " << i << " POSITION : " << glm::to_string(particles[i].get_position()) << "\n";
-        std::cout << particles[i].get_spring_count() << "\n";
     }
 
     //OK

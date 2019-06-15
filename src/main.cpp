@@ -52,7 +52,7 @@ int main()
     const int numModels = 1;
     Texture2D texture[numModels];
 
-    texture[0].loadTexture("texture/solid.jpg", true);
+    texture[0].loadTexture("texture/yellow.png", true);
 
     double lastTime = glfwGetTime();
     double elapsedChrono;
@@ -82,6 +82,11 @@ int main()
                         acc_force += particles[i].calc_force_on_particle(j, current_position, connected_particle_position);
                     }
                 }
+                if (glfwGetTime() > 5.0f)
+                {
+                    particles[n * n - n].unfix();
+                }
+
                 // else
                 // {
                 //     particles[i].set_position_for_fixed_points(particles[i].get_position() + glm::vec3(0.0, 0.1, 0.0));

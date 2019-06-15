@@ -17,5 +17,6 @@ glm::vec3 Spring::calculate_spring_force(glm::vec3 xa, glm::vec3 xb, double mass
     total_force = normalized_dir * (float)(-ks * (glm::length(xa_minus_xb) - l0));
     total_force += glm::vec3(0.0, -4.0, 0) * (float)mass;
     total_force -= normalized_dir * (float)((glm::dot(velocity, normalized_dir)) * kd);
+    // total_force += glm::vec3(1.0, 0.0, 0.0); // External force
     return total_force;
 }

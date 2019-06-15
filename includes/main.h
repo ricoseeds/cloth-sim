@@ -47,7 +47,7 @@ glm::vec3 modelScale[] = {
 
 // Point Light positions
 glm::vec3 pointLightPos[3] = {
-    glm::vec3(0.0f, 0.8f, -5.0f),
+    glm::vec3(0.0f, 0.0f, 0.0f),
     glm::vec3(0.5f, 13.8f, 0.0f),
     glm::vec3(5.0f, 13.8, 0.0f)};
 
@@ -302,13 +302,13 @@ void set_lighting(ShaderProgram lightingShader, glm::mat4 view, glm::mat4 projec
 
     // Directional light
     lightingShader.setUniform("sunLight.direction", glm::vec3(0.0f, -0.9f, -0.17f));
-    lightingShader.setUniform("sunLight.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
+    lightingShader.setUniform("sunLight.ambient", glm::vec3(0.4f, 0.4f, 0.4f));
     lightingShader.setUniform("sunLight.diffuse", glm::vec3(0.1f, 0.1f, 0.1f)); // dark
     lightingShader.setUniform("sunLight.specular", glm::vec3(0.1f, 0.1f, 0.1f));
 
     // Point Light 1
     lightingShader.setUniform("pointLights[0].ambient", glm::vec3(0.2f, 0.2f, 0.2f));
-    lightingShader.setUniform("pointLights[0].diffuse", glm::vec3(1.0f, 1.0f, 1.0f)); // green-ish light
+    lightingShader.setUniform("pointLights[0].diffuse", glm::vec3(1.0f, 1.0f, 1.0f));
     lightingShader.setUniform("pointLights[0].specular", glm::vec3(1.0f, 1.0f, 1.0f));
     lightingShader.setUniform("pointLights[0].position", pointLightPos[0]);
     lightingShader.setUniform("pointLights[0].constant", 1.0f);
@@ -317,20 +317,20 @@ void set_lighting(ShaderProgram lightingShader, glm::mat4 view, glm::mat4 projec
 
     // Point Light 2
     lightingShader.setUniform("pointLights[1].ambient", glm::vec3(0.2f, 0.2f, 0.2f));
-    lightingShader.setUniform("pointLights[1].diffuse", glm::vec3(1.0f, 1.0f, 1.0f)); // red-ish light
+    lightingShader.setUniform("pointLights[1].diffuse", glm::vec3(1.0f, 1.0f, 1.0f));
     lightingShader.setUniform("pointLights[1].specular", glm::vec3(1.0f, 1.0f, 1.0f));
     lightingShader.setUniform("pointLights[1].position", pointLightPos[1]);
     lightingShader.setUniform("pointLights[1].constant", 1.0f);
-    lightingShader.setUniform("pointLights[1].linear", 0.022f);
+    lightingShader.setUniform("pointLights[1].linear", 0.22f);
     lightingShader.setUniform("pointLights[1].exponent", 0.020f);
 
     // Point Light 3
     lightingShader.setUniform("pointLights[2].ambient", glm::vec3(0.2f, 0.2f, 0.2f));
-    lightingShader.setUniform("pointLights[2].diffuse", glm::vec3(1.0f, 1.0f, 1.0f)); // blue-ish light
+    lightingShader.setUniform("pointLights[2].diffuse", glm::vec3(1.0f, 1.0f, 1.0f));
     lightingShader.setUniform("pointLights[2].specular", glm::vec3(1.0f, 1.0f, 1.0f));
     lightingShader.setUniform("pointLights[2].position", pointLightPos[2]);
     lightingShader.setUniform("pointLights[2].constant", 1.0f);
-    lightingShader.setUniform("pointLights[2].linear", 0.22f);
+    lightingShader.setUniform("pointLights[2].linear", 0.82f);
     lightingShader.setUniform("pointLights[2].exponent", 0.20f);
 
     // Spot light

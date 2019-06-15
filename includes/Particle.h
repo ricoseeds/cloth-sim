@@ -24,7 +24,9 @@ public:
     Particle(glm::vec3 pos);
     void toggle_fixed();
     void add_spring(int, int, double, double);
-    glm::vec3 get_position()
+    void unfix();
+    glm::vec3
+    get_position()
     {
         return position;
     }

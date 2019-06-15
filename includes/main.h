@@ -33,6 +33,23 @@ bool gWireframe = false;
 bool gFlashlightOn = true;
 glm::vec4 gClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 static bool mac_moved = false;
+// Model positions
+glm::vec3 modelPos[] = {
+    glm::vec3(0.0f, 0.0f, 0.0f)
+
+};
+
+// Model scale
+glm::vec3 modelScale[] = {
+    glm::vec3(0.10f, 0.1f, 0.1f)
+
+};
+
+// Point Light positions
+glm::vec3 pointLightPos[3] = {
+    glm::vec3(0.0f, 0.8f, -5.0f),
+    glm::vec3(0.5f, 13.8f, 0.0f),
+    glm::vec3(5.0f, 13.8, 0.0f)};
 
 const double ZOOM_SENSITIVITY = -3.0;
 const float MOVE_SPEED = 5.0; // units per second
@@ -48,7 +65,7 @@ void update(double elapsedTime);
 void showFPS(GLFWwindow *window);
 bool initOpenGL();
 void mac_patch(GLFWwindow *window);
-
+void set_lighting(ShaderProgram lightingShader, glm::mat4 view, glm::mat4 projection, glm::vec3 viewPos);
 bool initOpenGL()
 {
     // Intialize GLFW
@@ -301,4 +318,63 @@ void glfw_onMouseMove(GLFWwindow *window, double posX, double posY)
         lastMousePosMod.x = (float)posX;
         lastMousePosMod.y = (float)posY;
     }
+}
+
+void set_lighting(ShaderProgram lightingShader, glm::mat4 view, glm::mat4 projection, glm::vec3 viewPos)
+{
+    lightingShader.use();
+    lightingShader.setUniform("model", glm::mat4(1.0)); // do not need to translate the models so just send the identity matrix
+    lightingShader.setUniform("view", view);
+    lightingShader.setUniform("projection", projection);
+    lightingShader.setUniform("viewPos", viewPos);
+
+    // Directional light
+    lightingShader.setUniform("sunLight.direction", glm::vec3(0.0f, -0.9f, -0.17f));
+    lightingShader.setUniform("sunLight.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
+    lightingShader.setUniform("sunLight.diffuse", glm::vec3(0.1f, 0.1f, 0.1f)); // dark
+    lightingShader.setUniform("sunLight.specular", glm::vec3(0.1f, 0.1f, 0.1f));
+
+    // Point Light 1
+    lightingShader.setUniform("pointLights[0].ambient", glm::vec3(0.2f, 0.2f, 0.2f));
+    lightingShader.setUniform("pointLights[0].diffuse", glm::vec3(1.0f, 1.0f, 1.0f)); // green-ish light
+    lightingShader.setUniform("pointLights[0].specular", glm::vec3(1.0f, 1.0f, 1.0f));
+    lightingShader.setUniform("pointLights[0].position", pointLightPos[0]);
+    lightingShader.setUniform("pointLights[0].constant", 1.0f);
+    lightingShader.setUniform("pointLights[0].linear", 0.022f);
+    lightingShader.setUniform("pointLights[0].exponent", 0.020f);
+
+    // Point Light 2
+    lightingShader.setUniform("pointLights[1].ambient", glm::vec3(0.2f, 0.2f, 0.2f));
+    lightingShader.setUniform("pointLights[1].diffuse", glm::vec3(1.0f, 1.0f, 1.0f)); // red-ish light
+    lightingShader.setUniform("pointLights[1].specular", glm::vec3(1.0f, 1.0f, 1.0f));
+    lightingShader.setUniform("pointLights[1].position", pointLightPos[1]);
+    lightingShader.setUniform("pointLights[1].constant", 1.0f);
+    lightingShader.setUniform("pointLights[1].linear", 0.022f);
+    lightingShader.setUniform("pointLights[1].exponent", 0.020f);
+
+    // Point Light 3
+    lightingShader.setUniform("pointLights[2].ambient", glm::vec3(0.2f, 0.2f, 0.2f));
+    lightingShader.setUniform("pointLights[2].diffuse", glm::vec3(1.0f, 1.0f, 1.0f)); // blue-ish light
+    lightingShader.setUniform("pointLights[2].specular", glm::vec3(1.0f, 1.0f, 1.0f));
+    lightingShader.setUniform("pointLights[2].position", pointLightPos[2]);
+    lightingShader.setUniform("pointLights[2].constant", 1.0f);
+    lightingShader.setUniform("pointLights[2].linear", 0.22f);
+    lightingShader.setUniform("pointLights[2].exponent", 0.20f);
+
+    // Spot light
+    glm::vec3 spotlightPos = orbitCamera.getPosition();
+    // offset the flash light down a little
+    spotlightPos.y -= 0.5f;
+
+    lightingShader.setUniform("spotLight.ambient", glm::vec3(0.1f, 0.1f, 0.1f));
+    lightingShader.setUniform("spotLight.diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
+    lightingShader.setUniform("spotLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+    lightingShader.setUniform("spotLight.position", spotlightPos);
+    lightingShader.setUniform("spotLight.direction", orbitCamera.getLook());
+    lightingShader.setUniform("spotLight.cosInnerCone", glm::cos(glm::radians(15.0f)));
+    lightingShader.setUniform("spotLight.cosOuterCone", glm::cos(glm::radians(20.0f)));
+    lightingShader.setUniform("spotLight.constant", 1.0f);
+    lightingShader.setUniform("spotLight.linear", 0.0007f);
+    lightingShader.setUniform("spotLight.exponent", 0.0000017f);
+    lightingShader.setUniform("spotLight.on", gFlashlightOn);
 }

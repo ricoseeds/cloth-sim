@@ -52,7 +52,7 @@ int main()
     const int numModels = 1;
     Texture2D texture[numModels];
 
-    texture[0].loadTexture("texture/yellow.png", true);
+    texture[0].loadTexture("texture/solid.jpg", true);
 
     double lastTime = glfwGetTime();
     double elapsedChrono;
@@ -85,6 +85,7 @@ int main()
                 if (glfwGetTime() > 5.0f)
                 {
                     particles[n * n - n].unfix();
+                    particles[(n * n) - 1].unfix();
                 }
 
                 // else

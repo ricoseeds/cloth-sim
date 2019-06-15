@@ -28,6 +28,10 @@ public:
     {
         return position;
     }
+    glm::vec3 set_position_for_fixed_points(glm::vec3 pos)
+    {
+        position = pos;
+    }
     glm::vec3 set_position(double deltaT)
     {
         position = position + (velocity * (float)(deltaT));

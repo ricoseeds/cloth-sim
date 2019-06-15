@@ -3,7 +3,7 @@
 Spring::Spring(int from, int to, double rest_length, double spring_const)
 {
     ks = spring_const;
-    kd = 4.0f;
+    kd = 1.0f;
     l0 = rest_length;
     orig = from;
     dest = to;

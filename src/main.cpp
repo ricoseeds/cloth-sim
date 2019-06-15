@@ -8,7 +8,7 @@ int main()
         std::cerr << "GLFW initialization failed" << std::endl;
         return -1;
     }
-    int n = 5; // n_squared number of particles in the mass spring system
+    int n = 20; // n_squared number of particles in the mass spring system
     Gridify *grid;
     grid = new Gridify(n);
     grid->build_connections();
@@ -27,7 +27,7 @@ int main()
         {
             // Particle *particle = new Particle(particle_positions[particle_count]);
             Particle particle(particle_positions[particle_count]);
-            if ((i == 0 && j == 0) || (i == 0 && j == n - 1)) // for the fixed locations in the particle system
+            if ((i == 0 && j == 0) || (i == 0 && j == n - 1) || (i == n - 1 && j == 0) || (i == n - 1 && j == n - 1)) // for the fixed locations in the particle system
             {
                 particle.toggle_fixed();
             }
@@ -82,6 +82,11 @@ int main()
                         acc_force += particles[i].calc_force_on_particle(j, current_position, connected_particle_position);
                     }
                 }
+                // else
+                // {
+                //     particles[i].set_position_for_fixed_points(particles[i].get_position() + glm::vec3(0.0, 0.1, 0.0));
+                //     std::cout << "pos" << glm::to_string(particles[i].get_position()) << "\n";
+                // }
                 particles[i].set_velocity(acc_force, delta);
                 particles[i].set_position(delta);
                 mesh.online_update_vertices(particles[i].get_position());
@@ -121,10 +126,10 @@ int main()
 
         for (int i = 0; i < numModels; i++)
         {
-            model = glm::scale(glm::mat4(1.0), modelScale[i] * 2.0f) * glm::rotate(glm::mat4(1.0), glm::radians((float)(gModelYaw)), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::rotate(glm::mat4(1.0), glm::radians((float)(gModelPitch)), glm::vec3(1.0f, 0.0f, 0.0f)); // * glm::rotate(glm::mat4(1.0), glm::radians((double)angle), glm::vec3(0.0f, 1.0f, 0.0f));
+            model = glm::scale(glm::mat4(1.0), modelScale[i] * 3.0f) * glm::rotate(glm::mat4(1.0), glm::radians((float)(gModelYaw)), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::rotate(glm::mat4(1.0), glm::radians((float)(gModelPitch)), glm::vec3(1.0f, 0.0f, 0.0f)); // * glm::rotate(glm::mat4(1.0), glm::radians((double)angle), glm::vec3(0.0f, 1.0f, 0.0f));
             lightingShader.setUniform("model", model);
             // Set material properties
-            lightingShader.setUniform("material.ambient", glm::vec3(0.1f, 0.1f, 0.1f));
+            lightingShader.setUniform("material.ambient", glm::vec3(0.3f, 0.3f, 0.3f));
             lightingShader.setUniformSampler("material.diffuseMap", 0);
             lightingShader.setUniform("material.specular", glm::vec3(0.9f, 0.9f, 0.9f));
             lightingShader.setUniform("material.shininess", 100.0f);

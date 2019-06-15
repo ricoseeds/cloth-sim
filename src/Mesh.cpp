@@ -210,17 +210,17 @@ void Mesh::genCloth(int n)
 {
     // n += 1;
     int n_squared = n * n;
-    double y_max = 10.0f, y_step = 1.0f;
+    double y_max = 30.0f, y_step = 1.0f;
     // Vertex meshVertex;
     int k = 0, c = 0;
     for (size_t i = 0; i < n; i++)
     {
         for (size_t j = 0; j < n; j++)
         {
-            tempVertices.push_back(glm::vec3((double)j, y_max, 0.0));
+            // tempVertices.push_back(glm::vec3((double)j, y_max, 0.0));
 
             // ROTATED ALL POINTS TO BRING IT ZX PLANE
-            // tempVertices.push_back(glm::vec3(glm::rotate(glm::mat4(1.0), glm::radians((float)(-120.0f)), glm::vec3(1.0f, 0.0f, 0.0f)) * glm::vec4((double)j, y_max, 0.0, 1.0)));
+            tempVertices.push_back(glm::vec3(glm::rotate(glm::mat4(1.0), glm::radians((float)(-120.0f)), glm::vec3(1.0f, 0.0f, 0.0f)) * glm::vec4((double)j, y_max, 0.0, 1.0)));
             // Index of triangle 1
             if ((j + 1) % n != 0 && c < n_squared - n)
             {

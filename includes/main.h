@@ -21,8 +21,8 @@ using namespace Eigen;
 // Global Variables
 OrbitCamera orbitCamera;
 float gRadius = 4.0f;
-float gYaw = -2.0f;
-float gPitch = 0.0f;
+float gYaw = 0.0f;
+float gPitch = 30.0f;
 float gModelYaw = 0.0f;
 float gModelPitch = 0.0f;
 const char *APP_TITLE = "CLOTH SIM";
@@ -41,7 +41,7 @@ glm::vec3 modelPos[] = {
 
 // Model scale
 glm::vec3 modelScale[] = {
-    glm::vec3(0.10f, 0.1f, 0.1f)
+    glm::vec3(0.4f, 0.4f, 0.4f)
 
 };
 
@@ -175,34 +175,6 @@ void update(double elapsedTime)
     // Camera orientation
     double mouseX, mouseY;
 
-    // Get the current mouse cursor position delta
-    // glfwGetCursorPos(gWindow, &mouseX, &mouseY);
-
-    // Rotate the camera the difference in mouse distance from the center screen.  Multiply this delta by a speed scaler
-    // fpsCamera.rotate((float)(gWindowWidth / 2.0 - mouseX) * MOUSE_SENSITIVITY, (float)(gWindowHeight / 2.0 - mouseY) * MOUSE_SENSITIVITY);
-
-    // Clamp mouse cursor to center of screen
-    // glfwSetCursorPos(gWindow, gWindowWidth / 2.0, gWindowHeight / 2.0);
-
-    // Camera FPS movement
-
-    // Forward/backward
-    // if (glfwGetKey(gWindow, GLFW_KEY_W) == GLFW_PRESS)
-    // 	fpsCamera.move(MOVE_SPEED * (float)elapsedTime * fpsCamera.getLook());
-    // else if (glfwGetKey(gWindow, GLFW_KEY_S) == GLFW_PRESS)
-    // 	fpsCamera.move(MOVE_SPEED * (float)elapsedTime * -fpsCamera.getLook());
-
-    // // Strafe left/right
-    // if (glfwGetKey(gWindow, GLFW_KEY_A) == GLFW_PRESS)
-    // 	fpsCamera.move(MOVE_SPEED * (float)elapsedTime * -fpsCamera.getRight());
-    // else if (glfwGetKey(gWindow, GLFW_KEY_D) == GLFW_PRESS)
-    // 	fpsCamera.move(MOVE_SPEED * (float)elapsedTime * fpsCamera.getRight());
-
-    // // Up/down
-    // if (glfwGetKey(gWindow, GLFW_KEY_Z) == GLFW_PRESS)
-    // 	fpsCamera.move(MOVE_SPEED * (float)elapsedTime * glm::vec3(0.0f, 1.0f, 0.0f));
-    // else if (glfwGetKey(gWindow, GLFW_KEY_X) == GLFW_PRESS)
-    // 	fpsCamera.move(MOVE_SPEED * (float)elapsedTime * -glm::vec3(0.0f, 1.0f, 0.0f));
     if (glfwGetKey(gWindow, GLFW_KEY_W) == GLFW_PRESS)
         orbitCamera.move(MOVE_SPEED * (float)elapsedTime * orbitCamera.getLook());
     else if (glfwGetKey(gWindow, GLFW_KEY_S) == GLFW_PRESS)

@@ -1,14 +1,14 @@
 # Cloth-simulation
 
-Cloth-Simulation using mass-spring system and opengl-3.3 in c++11.
+Cloth-Simulation using mass-spring system.
 
 ### Run
 ```
-    $ g++ src/*.cpp -I/usr/local/Cellar/eigen/3.3.7/include/eigen3 -framework OpenGl -I/usr/local/include -lglfw -lGLEW
+    $ g++ src/*.cpp -std=c++11 -I/usr/local/Cellar/eigen/3.3.7/include/eigen3 -framework OpenGl -I/usr/local/include -lglfw -lGLEW
 ```
 
 ## Built With
-* Opengl3.3(with shaders)
+* OpenGl-3.3
 * c++11
 
 ### Result
@@ -16,5 +16,11 @@ Cloth-Simulation using mass-spring system and opengl-3.3 in c++11.
 
 ### TODO
 * Fast Mass springs
+* Tearing
+* Lighting issues
+* Better Time Stepping
+
+
+
 
 

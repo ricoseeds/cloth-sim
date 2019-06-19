@@ -30,6 +30,10 @@ public:
     {
         return position;
     }
+    double get_mass()
+    {
+        return mass;
+    }
     glm::vec3 set_position_for_fixed_points(glm::vec3 pos)
     {
         position = pos;
@@ -56,7 +60,7 @@ public:
     }
     glm::vec3 calc_force_on_particle(int index, glm::vec3 xa, glm::vec3 xb)
     {
-        return springs[index].calculate_spring_force(xa, xb, mass, velocity);
+        return springs[index].calculate_spring_force(xa, xb, velocity);
     }
     bool is_fixed()
     {

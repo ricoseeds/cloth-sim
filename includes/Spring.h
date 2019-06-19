@@ -19,7 +19,7 @@ private:
 
 public:
     Spring(int, int, double, double);
-    glm::vec3 calculate_spring_force(glm::vec3 xa, glm::vec3 xb, double mass, glm::vec3 velocity);
+    glm::vec3 calculate_spring_force(glm::vec3 xa, glm::vec3 xb, glm::vec3 velocity);
     int get_destination()
     {
         return dest;

@@ -81,6 +81,8 @@ int main()
                         glm::vec3 connected_particle_position = particles[particles[i].get_spring_destination(j)].get_position();
                         acc_force += particles[i].calc_force_on_particle(j, current_position, connected_particle_position);
                     }
+                    acc_force += glm::vec3(0.0, -19.8, 0) * (float)(particles[i].get_mass());
+                    // acc_force += glm::vec3(1.0, 0.0, 0.0); // External force
                 }
                 if (glfwGetTime() > 5.0f)
                 {

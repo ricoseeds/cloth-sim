@@ -163,3 +163,12 @@ int main()
 
     return 0;
 }
+// #include "../includes/Halfedge.h"
+// #include <iostream>
+// int main()
+// {
+//     MeshHE *mymesh = new MeshHE();
+//     mymesh->create();
+//     // std::cout << "hello";
+//     return 0;
+// }

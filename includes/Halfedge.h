@@ -20,12 +20,7 @@ public:
         edge = nullptr;
         this->id = id;
     }
-    MeshVertex(int id, glm::vec3 pos)
-    {
-        edge = nullptr;
-        this->id = id;
-        this->position = pos;
-    }
+    MeshVertex(int id, glm::vec3 pos) : id(id), position(pos), edge(NULL) {}
     MeshVertex(int id, HalfEdge *edge)
     {
         this->edge = edge;

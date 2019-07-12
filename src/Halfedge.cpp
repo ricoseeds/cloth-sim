@@ -58,8 +58,11 @@ void MeshHE::create_mesh()
         // std::cout << "Edge3 : " << edge3.first << " - " << edge3.second << "\n\n\n";
 
         Edges[edge1] = std::move(new HalfEdge(he_count));
+        Edges[edge1]->edge_pair = edge1;
         Edges[edge2] = std::move(new HalfEdge(he_count + 1));
+        Edges[edge2]->edge_pair = edge2;
         Edges[edge3] = std::move(new HalfEdge(he_count + 2));
+        Edges[edge3]->edge_pair = edge3;
         he_count += 3;
         newFace->start_edge = Edges[edge1];
         // perform the next edge connection
@@ -74,6 +77,10 @@ void MeshHE::create_mesh()
         Edges[edge1]->vertex = Vertices[std::get<0>(face) - 1];
         Edges[edge2]->vertex = Vertices[std::get<1>(face) - 1];
         Edges[edge3]->vertex = Vertices[std::get<2>(face) - 1];
+        // halfedge pointing to faces
+        Edges[edge1]->face = newFace;
+        Edges[edge2]->face = newFace;
+        Edges[edge3]->face = newFace;
 
         // make MeshVertex point to atleast one HE if meshVertex->edge == nullptr
         // std::cout << " face : " << std::get<0>(face) - 1 << " " << std::get<1>(face) - 1 << " " << std::get<2>(face) - 1 << "\n";
@@ -121,12 +128,13 @@ void MeshHE::create_mesh()
 
     std::cout << " No of faces : " << Faces.size() << "\n";
     HalfEdge *begin = Faces[1]->start_edge;
-    std::cout << "Id of the first face : " << begin->id << std::endl;
+    std::cout << "Id of the HE  : " << begin->id << std::endl;
     HalfEdge *t = begin;
     do
     {
-        std::cout << t->vertex->id << ": " << glm::to_string(t->vertex->position) << "\n";
-        t = t->nextHalfEdge;
+        // std::cout << t->vertex->id << ": " << glm::to_string(t->vertex->position) << "\n";
+        std::cout << t->face->id << "\n";
+        t = t->prevHalfEdge;
     } while (t != begin);
 
     // std::cout << glm::to_string(Vertices[0]->position);

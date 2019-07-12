@@ -67,6 +67,7 @@ public:
     HalfEdge *prevHalfEdge;
     MeshVertex *vertex; // todo
     MeshFace *face;
+    std::pair<int, int> edge_pair;
     HalfEdge()
     {
         face = nullptr;

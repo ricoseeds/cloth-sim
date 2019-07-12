@@ -6,13 +6,14 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include "glm/gtx/string_cast.hpp"
 
 void MeshHE::create_mesh()
 {
     // std::vector<MeshVertex *> all_verts;
     std::vector<std::tuple<int, int, int>> indices;
     std::map<int, MeshVertex *> HVertices;
-    std::ifstream infile("./data/triangles.obj");
+    std::ifstream infile("./data/mydata.obj");
     std::string line;
     glm::vec3 temp;
     int vcounter = 1;
@@ -53,6 +54,10 @@ void MeshHE::create_mesh()
         edge1 = std::make_pair(std::get<0>(face), std::get<1>(face));
         edge2 = std::make_pair(std::get<1>(face), std::get<2>(face));
         edge3 = std::make_pair(std::get<0>(face), std::get<2>(face));
+        std::cout << "Edge1 : " << edge1.first << " - " << edge1.second << "\n";
+        std::cout << "Edge2 : " << edge2.first << " - " << edge2.second << "\n";
+        std::cout << "Edge3 : " << edge3.first << " - " << edge3.second << "\n\n\n";
+
         Edges[edge1] = std::move(new HalfEdge(he_count));
         Edges[edge2] = std::move(new HalfEdge(he_count + 1));
         Edges[edge3] = std::move(new HalfEdge(he_count + 2));
@@ -103,12 +108,23 @@ void MeshHE::create_mesh()
             Edges[edge3]->pairHalfEdge = Edges[std::pair(edge3.second, edge3.first)];
             Edges[std::pair(edge3.second, edge3.first)]->pairHalfEdge = Edges[edge3];
         }
+        // push bach faces, half edges and vertices
         HalfEdges.push_back(Edges[edge1]);
         HalfEdges.push_back(Edges[edge2]);
         HalfEdges.push_back(Edges[edge3]);
         Faces.push_back(newFace);
     }
-    // push bach faces, half edges and vertices
+
+    std::cout << " No of faces : " << Faces.size() << "\n";
+    HalfEdge *begin = Faces[1]->start_edge;
+    HalfEdge *t = begin;
+    do
+    {
+        std::cout << t->vertex->id << ": " << glm::to_string(t->vertex->position) << "\n";
+        t = t->nextHalfEdge;
+    } while (t != begin);
+
+    // std::cout << glm::to_string(Vertices[0]->position);
 }
 // void MeshHE::create() // Manual wiring of half edges
 // {

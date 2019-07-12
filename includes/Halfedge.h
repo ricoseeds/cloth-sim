@@ -69,7 +69,7 @@ public:
     HalfEdge *pairHalfEdge;
     HalfEdge *nextHalfEdge;
     HalfEdge *prevHalfEdge;
-    MeshVertex *vertex;
+    MeshVertex *vertex; // todo
     MeshFace *face;
     HalfEdge()
     {

@@ -15,14 +15,11 @@ void MeshHE::create_mesh()
     std::ifstream infile("./data/triangles.obj");
     std::string line;
     glm::vec3 temp;
+    int vcounter = 1;
+    char type;
     while (std::getline(infile, line))
     {
-        // std::vector<MeshVertex *> Vertices;
-        // std::vector<HalfEdge *> HalfEdges;
-        // std::vector<MeshFace *> Faces;
         std::istringstream ss(line);
-        char type;
-        int vcounter = 0;
         ss >> type;
         switch (type)
         {
@@ -69,18 +66,26 @@ void MeshHE::create_mesh()
         Edges[edge1]->prevHalfEdge = Edges[edge3];
         Edges[edge3]->prevHalfEdge = Edges[edge2];
         Edges[edge2]->prevHalfEdge = Edges[edge1];
+        // halfedge pointing to vertices
+        Edges[edge1]->vertex = Vertices[std::get<0>(face)];
+        Edges[edge2]->vertex = Vertices[std::get<1>(face)];
+        Edges[edge3]->vertex = Vertices[std::get<2>(face)];
+
         // make MeshVertex point to atleast one HE if meshVertex->edge == nullptr
-        if (HVertices[std::get<0>(face)]->edge == nullptr)
+        if (HVertices[std::get<0>(face)] == nullptr)
         {
             HVertices[std::get<0>(face)]->edge = Edges[edge1];
+            Vertices[std::get<0>(face)]->edge = Edges[edge1];
         }
         if (HVertices[std::get<1>(face)]->edge == nullptr)
         {
             HVertices[std::get<1>(face)]->edge = Edges[edge2];
+            Vertices[std::get<1>(face)]->edge = Edges[edge2];
         }
         if (HVertices[std::get<2>(face)]->edge == nullptr)
         {
             HVertices[std::get<2>(face)]->edge = Edges[edge3];
+            Vertices[std::get<2>(face)]->edge = Edges[edge3];
         }
         // perform the  connections
         if (Edges.find(std::pair(edge1.second, edge1.first)) != Edges.end())
@@ -101,7 +106,7 @@ void MeshHE::create_mesh()
         HalfEdges.push_back(Edges[edge1]);
         HalfEdges.push_back(Edges[edge2]);
         HalfEdges.push_back(Edges[edge3]);
-        // Faces.push_back(newFace);
+        Faces.push_back(newFace);
     }
     // push bach faces, half edges and vertices
 }

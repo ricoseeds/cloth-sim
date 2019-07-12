@@ -19,6 +19,12 @@ public:
         edge = nullptr;
         this->id = id;
     }
+    MeshVertex(int id, glm::vec3 pos)
+    {
+        edge = nullptr;
+        this->id = id;
+        this->position = pos;
+    }
     MeshVertex(int id, HalfEdge *edge)
     {
         this->edge = edge;
@@ -62,6 +68,7 @@ public:
     int id;
     HalfEdge *pairHalfEdge;
     HalfEdge *nextHalfEdge;
+    HalfEdge *prevHalfEdge;
     MeshVertex *vertex;
     MeshFace *face;
     HalfEdge()
@@ -70,6 +77,7 @@ public:
         vertex = nullptr;
         nextHalfEdge = nullptr;
         pairHalfEdge = nullptr;
+        prevHalfEdge = nullptr;
         id = -1;
     }
     HalfEdge(int id)
@@ -78,6 +86,7 @@ public:
         vertex = nullptr;
         nextHalfEdge = nullptr;
         pairHalfEdge = nullptr;
+        prevHalfEdge = nullptr;
         this->id = id;
     }
 };
@@ -89,6 +98,7 @@ public:
     std::vector<HalfEdge *> HalfEdges;
     std::vector<MeshFace *> Faces;
     void create();
+    void create_mesh();
 };
 
 #endif

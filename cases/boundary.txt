@@ -1,0 +1,21 @@
+// boundary case
+    // HalfEdge *begin = Vertices[0]->edge;
+    // std::cout << "Id of the HE  : " << begin->id << std::endl;
+    // HalfEdge *t = begin;
+    // bool boundary_flag = false;
+    // do
+    // {
+    //     std::cout << t->face->id << "\n";
+    //     // order of these next two statement, matters
+    //     if (t->boundary)
+    //     {
+    //         boundary_flag = true;
+    //         break;
+    //     }
+    //     t = t->pairHalfEdge->nextHalfEdge;
+
+    // } while (t != begin);
+    // if (boundary_flag)
+    // {
+    //     std::cout << "Boundary detected";
+    // }

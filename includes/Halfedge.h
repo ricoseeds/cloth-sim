@@ -4,6 +4,14 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include "glm/glm.hpp"
 #include <vector>
+#include <tuple>
+#include <map>
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <memory>
+#include "glm/gtx/string_cast.hpp"
 
 class MeshVertex;
 class MeshFace;
@@ -68,23 +76,25 @@ public:
     MeshVertex *vertex; // todo
     MeshFace *face;
     std::pair<int, int> edge_pair;
-    HalfEdge()
-    {
-        face = nullptr;
-        vertex = nullptr;
-        nextHalfEdge = nullptr;
-        pairHalfEdge = nullptr;
-        prevHalfEdge = nullptr;
-        id = -1;
-    }
+    bool boundary;
+    // HalfEdge()
+    // {
+    //     face = nullptr;
+    //     vertex = nullptr;
+    //     nextHalfEdge = nullptr;
+    //     pairHalfEdge = nullptr;
+    //     prevHalfEdge = nullptr;
+    //     id = -1;
+    // }
     HalfEdge(int id)
     {
-        face = nullptr;
-        vertex = nullptr;
-        nextHalfEdge = nullptr;
-        pairHalfEdge = nullptr;
-        prevHalfEdge = nullptr;
+        face = NULL;
+        vertex = NULL;
+        nextHalfEdge = NULL;
+        pairHalfEdge = NULL;
+        prevHalfEdge = NULL;
         this->id = id;
+        this->boundary = true;
     }
 };
 
@@ -94,7 +104,6 @@ public:
     std::vector<MeshVertex *> Vertices;
     std::vector<HalfEdge *> HalfEdges;
     std::vector<MeshFace *> Faces;
-    void create();
     void create_mesh();
 };
 

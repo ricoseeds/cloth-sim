@@ -104,7 +104,9 @@ public:
     std::vector<MeshVertex *> Vertices;
     std::vector<HalfEdge *> HalfEdges;
     std::vector<MeshFace *> Faces;
-    void create_mesh();
+    std::vector<std::tuple<int, int, int>> indices;
+    void create_half_edge_mesh(std::string filename);
+    void parse(std::string filename);
 };
 
 #endif

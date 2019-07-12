@@ -1,37 +1,8 @@
 #include "../includes/Halfedge.h"
 
-void MeshHE::create_mesh()
+void MeshHE::create_half_edge_mesh(std::string filename)
 {
-    std::vector<std::tuple<int, int, int>> indices;
-    std::ifstream infile("./data/discon.obj");
-    // std::ifstream infile("./data/mydata.obj");
-    std::string line;
-    glm::vec3 temp;
-    int vcounter = 1;
-
-    while (std::getline(infile, line))
-    {
-        std::stringstream ss(line);
-        std::string type;
-        ss >> type;
-        if (type == "v")
-        {
-            float a, b, c;
-            ss >> a >> b >> c;
-            Vertices.push_back(std::move(new MeshVertex(vcounter, glm::vec3(a, b, c))));
-            vcounter++;
-        }
-        if (type == "f")
-        {
-            int x, y, z;
-            ss >> x >> y >> z;
-            indices.push_back(std::make_tuple(x, y, z));
-        }
-    }
-    for (size_t i = 0; i < Vertices.size(); i++)
-    {
-        std::cout << "ID : " << Vertices[i]->id << " POS: " << glm::to_string(Vertices[i]->position) << std::endl;
-    }
+    parse(filename);
 
     std::map<std::pair<unsigned int, unsigned int>, HalfEdge *> Edges;
     int face_count = 0;
@@ -45,10 +16,6 @@ void MeshHE::create_mesh()
         edge1 = std::make_pair(std::get<0>(face), std::get<1>(face));
         edge2 = std::make_pair(std::get<1>(face), std::get<2>(face));
         edge3 = std::make_pair(std::get<2>(face), std::get<0>(face));
-        // std::cout << "Edge1 : " << edge1.first << " - " << edge1.second << "\n";
-        // std::cout << "Edge2 : " << edge2.first << " - " << edge2.second << "\n";
-        // std::cout << "Edge3 : " << edge3.first << " - " << edge3.second << "\n\n\n";
-
         Edges[edge1] = std::move(new HalfEdge(he_count));
         Edges[edge1]->edge_pair = edge1;
         Edges[edge2] = std::move(new HalfEdge(he_count + 1));
@@ -73,9 +40,6 @@ void MeshHE::create_mesh()
         Edges[edge1]->face = newFace;
         Edges[edge2]->face = newFace;
         Edges[edge3]->face = newFace;
-
-        // make MeshVertex point to atleast one HE if meshVertex->edge == nullptr
-        // std::cout << " face : " << std::get<0>(face) - 1 << " " << std::get<1>(face) - 1 << " " << std::get<2>(face) - 1 << "\n";
         if (Vertices[std::get<0>(face) - 1]->edge == NULL)
         {
             Vertices[std::get<0>(face) - 1]->edge = Edges[edge1];
@@ -88,11 +52,10 @@ void MeshHE::create_mesh()
         {
             Vertices[std::get<2>(face) - 1]->edge = Edges[edge3];
         }
-
         // perform the  connections
         if (Edges.find(std::pair(edge1.second, edge1.first)) != Edges.end())
         {
-            std::cout << "hit\n";
+            // std::cout << "hit\n";
             Edges[edge1]->pairHalfEdge = Edges[std::pair(edge1.second, edge1.first)];
             Edges[edge1]->boundary = false;
             Edges[std::pair(edge1.second, edge1.first)]->pairHalfEdge = Edges[edge1];
@@ -100,7 +63,7 @@ void MeshHE::create_mesh()
         }
         if (Edges.find(std::pair(edge2.second, edge2.first)) != Edges.end())
         {
-            std::cout << "hit\n";
+            // std::cout << "hit\n";
             Edges[edge2]->pairHalfEdge = Edges[std::pair(edge2.second, edge2.first)];
             Edges[edge2]->boundary = false;
             Edges[std::pair(edge2.second, edge2.first)]->pairHalfEdge = Edges[edge2];
@@ -108,7 +71,7 @@ void MeshHE::create_mesh()
         }
         if (Edges.find(std::pair(edge3.second, edge3.first)) != Edges.end())
         {
-            std::cout << "hit\n";
+            // std::cout << "hit\n";
             Edges[edge3]->pairHalfEdge = Edges[std::pair(edge3.second, edge3.first)];
             Edges[edge3]->boundary = false;
             Edges[std::pair(edge3.second, edge3.first)]->pairHalfEdge = Edges[edge3];
@@ -119,10 +82,33 @@ void MeshHE::create_mesh()
         HalfEdges.push_back(Edges[edge2]);
         HalfEdges.push_back(Edges[edge3]);
         Faces.push_back(newFace);
-        //     std::cout << " Id of the face created = " << newFace->id << "\n";
         face_count++;
-        std::cout << "face count : " << face_count << "\n";
     }
+}
+void MeshHE::parse(std::string filename)
+{
+    std::ifstream infile(filename);
+    std::string line;
+    glm::vec3 temp;
+    int vcounter = 1;
 
-    std::cout << " No of faces : " << Faces.size() << "\n";
+    while (std::getline(infile, line))
+    {
+        std::stringstream ss(line);
+        std::string type;
+        ss >> type;
+        if (type == "v")
+        {
+            float a, b, c;
+            ss >> a >> b >> c;
+            Vertices.push_back(std::move(new MeshVertex(vcounter, glm::vec3(a, b, c))));
+            vcounter++;
+        }
+        if (type == "f")
+        {
+            int x, y, z;
+            ss >> x >> y >> z;
+            indices.push_back(std::make_tuple(x, y, z));
+        }
+    }
 }

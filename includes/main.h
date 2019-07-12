@@ -17,6 +17,7 @@ using namespace Eigen;
 #include "../includes/Texture2D.h"
 #include "../includes/Camera.h"
 #include "../includes/Mesh.h"
+#include "../includes/Halfedge.h"
 
 // Global Variables
 OrbitCamera orbitCamera;

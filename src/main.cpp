@@ -165,3 +165,11 @@ int main()
 
     return 0;
 }
+// #include <iostream>
+// int main()
+// {
+//     MeshHE *mymesh = new MeshHE();
+//     mymesh->create_half_edge_mesh("./data/mydata.obj");
+//     // std::cout << "hello";
+//     return 0;
+// }

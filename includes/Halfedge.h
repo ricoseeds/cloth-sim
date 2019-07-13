@@ -23,24 +23,7 @@ public:
     int id;
     glm::vec3 position, normal;
     HalfEdge *edge;
-    MeshVertex(int id)
-    {
-        edge = nullptr;
-        this->id = id;
-    }
     MeshVertex(int id, glm::vec3 pos) : id(id), position(pos), edge(NULL) {}
-    MeshVertex(int id, HalfEdge *edge)
-    {
-        this->edge = edge;
-        this->id = id;
-    }
-    void operator=(const MeshVertex &v) // copy con
-    {
-        this->position = v.position;
-        this->normal = v.normal;
-        this->edge = v.edge;
-        this->id = v.id;
-    }
 };
 
 class MeshFace
@@ -51,18 +34,8 @@ public:
     HalfEdge *start_edge; // one of the half-edges bordering the face
     MeshFace(int id)
     {
-        start_edge = nullptr;
+        start_edge = NULL;
         this->id = id;
-    }
-    MeshFace(HalfEdge *start_edge, int id)
-    {
-        this->start_edge = start_edge;
-        this->id = id;
-    }
-    void operator=(const MeshFace &f)
-    {
-        this->start_edge = f.start_edge;
-        this->id = f.id;
     }
 };
 
@@ -77,15 +50,15 @@ public:
     MeshFace *face;
     std::pair<int, int> edge_pair;
     bool boundary;
-    // HalfEdge()
-    // {
-    //     face = nullptr;
-    //     vertex = nullptr;
-    //     nextHalfEdge = nullptr;
-    //     pairHalfEdge = nullptr;
-    //     prevHalfEdge = nullptr;
-    //     id = -1;
-    // }
+    HalfEdge()
+    {
+        face = NULL;
+        vertex = NULL;
+        nextHalfEdge = NULL;
+        pairHalfEdge = NULL;
+        prevHalfEdge = NULL;
+        id = -1;
+    }
     HalfEdge(int id)
     {
         face = NULL;
@@ -96,6 +69,7 @@ public:
         this->id = id;
         this->boundary = true;
     }
+    void set_id(int id) { this->id = id; }
 };
 
 class MeshHE
@@ -105,8 +79,11 @@ public:
     std::vector<HalfEdge *> HalfEdges;
     std::vector<MeshFace *> Faces;
     std::vector<std::tuple<int, int, int>> indices;
-    void create_half_edge_mesh(std::string filename);
-    void parse(std::string filename);
+    std::string filename;
+    // functions
+    MeshHE(std::string name) { this->filename = name; }
+    void create_half_edge_mesh();
+    void parse();
 };
 
 #endif

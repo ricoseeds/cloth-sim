@@ -1,8 +1,8 @@
 #include "../includes/Halfedge.h"
 
-void MeshHE::create_half_edge_mesh(std::string filename)
+void MeshHE::create_half_edge_mesh()
 {
-    parse(filename);
+    parse();
 
     std::map<std::pair<unsigned int, unsigned int>, HalfEdge *> Edges;
     int face_count = 0;
@@ -84,8 +84,19 @@ void MeshHE::create_half_edge_mesh(std::string filename)
         Faces.push_back(newFace);
         face_count++;
     }
+    HalfEdge *begin = Faces[0]->start_edge;
+    std::cout << "Id of the HE  : " << begin->id << std::endl;
+    HalfEdge *t = begin;
+    bool boundary_flag = false;
+    do
+    {
+        // std::cout << t->face->id << "\n";
+        std::cout << t->vertex->id << " ";
+        t = t->nextHalfEdge;
+
+    } while (t != begin);
 }
-void MeshHE::parse(std::string filename)
+void MeshHE::parse()
 {
     std::ifstream infile(filename);
     std::string line;

@@ -122,14 +122,31 @@ void MeshHE::perform_cut(glm::vec2 p0, glm::vec2 p1)
     //1->
     HalfEdge *begin_cut = NULL;
     HalfEdge *last_he = NULL;
+    HalfEdge *t;
+    glm::vec2 p2, p3;
     determine_start_and_end_faces(begin_cut, last_he, p0, p1);
     if (begin_cut != NULL)
     {
-        std::cout << " Id of the face in which the point is : " << begin_cut->face->id << "\n";
-    }
-    if (last_he != NULL)
-    {
-        std::cout << " Id of the face in which the point is : " << last_he->face->id << "\n";
+        t = begin_cut;
+        do
+        {
+            p2 = glm::vec2(t->vertex->position);
+            p3 = glm::vec2(t->nextHalfEdge->vertex->position);
+            float x, y;
+            if (geometry_k::get_line_intersection(p0, p1, p2, p3, &x, &y))
+            {
+                std::cout << " x, y = " << x << ", " << y << "\n";
+            }
+            t = t->nextHalfEdge;
+        } while (t != begin_cut);
+
+        // glm::vec2 p2 = glm::vec2(begin_cut->vertex->position);
+        // glm::vec2 p3 = glm::vec2(begin_cut->nextHalfEdge->vertex->position);
+        // float x, y;
+        // if (get_line_intersection(p0, p1, p2, p3, &x, &y))
+        // {
+        //     std::cout << " x, y = " << x << ", " << y << "\n";
+        // }
     }
 }
 
@@ -173,4 +190,13 @@ void MeshHE::determine_start_and_end_faces(HalfEdge *&begin_cut, HalfEdge *&last
         }
         tri_pos.clear();
     }
+    // debug stuff
+    // if (begin_cut != NULL)
+    // {
+    //     std::cout << " Id of the face in which the point is : " << begin_cut->face->id << "\n";
+    // }
+    // if (last_he != NULL)
+    // {
+    //     std::cout << " Id of the face in which the point is : " << last_he->face->id << "\n";
+    // }
 }

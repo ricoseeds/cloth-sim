@@ -23,7 +23,7 @@
 
 
 
-    
+
 
 //face
     HalfEdge *begin = Faces[0]->start_edge;
@@ -37,3 +37,29 @@
         t = t->nextHalfEdge;
 
     } while (t != begin);
+
+//all connections tested
+HalfEdge *begin = Faces[5]->start_edge;
+    std::cout << "Face[0] id : " << Faces[5]->id << std::endl;
+    HalfEdge *t = begin;
+    std::cout << t->id << std::endl;
+    std::cout << t->nextHalfEdge->id << std::endl;
+    std::cout << t->nextHalfEdge->nextHalfEdge->id << std::endl;
+    std::cout << t->nextHalfEdge->nextHalfEdge->nextHalfEdge->id << std::endl; // shouldbe same as t -> id
+    std::cout << "------\n";
+    std::cout << t->id << std::endl;
+    std::cout << t->prevHalfEdge->id << std::endl;
+    std::cout << t->prevHalfEdge->prevHalfEdge->id << std::endl;
+    std::cout << t->prevHalfEdge->prevHalfEdge->prevHalfEdge->id << std::endl; // shouldbe same as t -> id
+    std::cout << "------\n";
+    std::cout << glm::to_string(t->vertex->position) << std::endl;
+    std::cout << glm::to_string(t->nextHalfEdge->vertex->position) << std::endl;
+    std::cout << glm::to_string(t->nextHalfEdge->nextHalfEdge->vertex->position) << std::endl;
+    std::cout << glm::to_string(t->nextHalfEdge->nextHalfEdge->nextHalfEdge->vertex->position) << std::endl; // shouldbe same as t -> id
+    std::cout << "------\n";
+    std::cout << glm::to_string(t->vertex->position) << std::endl;
+    std::cout << glm::to_string(t->prevHalfEdge->vertex->position) << std::endl;
+    std::cout << glm::to_string(t->prevHalfEdge->prevHalfEdge->vertex->position) << std::endl;
+    std::cout << glm::to_string(t->prevHalfEdge->prevHalfEdge->prevHalfEdge->vertex->position) << std::endl; // shouldbe same as t -> id
+    std::cout << "id Opposite to he 6 : " << t->nextHalfEdge->nextHalfEdge->pairHalfEdge->id << "\n";
+ 

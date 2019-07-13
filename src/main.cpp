@@ -172,6 +172,9 @@ int main()
 {
     MeshHE *mymesh = new MeshHE("./data/mydata.obj");
     mymesh->create_half_edge_mesh();
+    mymesh->perform_cut(glm::vec2(-0.5, 2.8), glm::vec2(3.0, -1.5));
     // std::cout << "hello";
+    // extract mesh
+
     return 0;
 }

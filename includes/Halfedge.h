@@ -12,6 +12,7 @@
 #include <string>
 #include <memory>
 #include "glm/gtx/string_cast.hpp"
+#include "Geometry.h"
 
 class MeshVertex;
 class MeshFace;
@@ -79,11 +80,15 @@ public:
     std::vector<HalfEdge *> HalfEdges;
     std::vector<MeshFace *> Faces;
     std::vector<std::tuple<int, int, int>> indices;
+    std::map<std::pair<unsigned int, unsigned int>, HalfEdge *> Edges;
     std::string filename;
     // functions
     MeshHE(std::string name) { this->filename = name; }
     void create_half_edge_mesh();
     void parse();
+    void associate_vertices(MeshVertex *vert, std::pair<int, int> edge);
+    void perform_cut(glm::vec2 p0, glm::vec2 p1);
+    void get_triangle_positions_from_face(MeshFace *f, std::vector<glm::vec2> &positions);
 };
 
 #endif

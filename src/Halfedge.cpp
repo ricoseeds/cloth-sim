@@ -3,8 +3,6 @@
 void MeshHE::create_half_edge_mesh()
 {
     parse();
-
-    std::map<std::pair<unsigned int, unsigned int>, HalfEdge *> Edges;
     int face_count = 0;
     int he_count = 0;
     for (auto face : indices)
@@ -40,18 +38,9 @@ void MeshHE::create_half_edge_mesh()
         Edges[edge1]->face = newFace;
         Edges[edge2]->face = newFace;
         Edges[edge3]->face = newFace;
-        if (Vertices[std::get<0>(face) - 1]->edge == NULL)
-        {
-            Vertices[std::get<0>(face) - 1]->edge = Edges[edge1];
-        }
-        if (Vertices[std::get<1>(face) - 1]->edge == NULL)
-        {
-            Vertices[std::get<1>(face) - 1]->edge = Edges[edge2];
-        }
-        if (Vertices[std::get<2>(face) - 1]->edge == NULL)
-        {
-            Vertices[std::get<2>(face) - 1]->edge = Edges[edge3];
-        }
+        associate_vertices(Vertices[std::get<0>(face) - 1], edge1);
+        associate_vertices(Vertices[std::get<1>(face) - 1], edge2);
+        associate_vertices(Vertices[std::get<2>(face) - 1], edge3);
         // perform the  connections
         if (Edges.find(std::pair(edge1.second, edge1.first)) != Edges.end())
         {
@@ -84,18 +73,15 @@ void MeshHE::create_half_edge_mesh()
         Faces.push_back(newFace);
         face_count++;
     }
-    HalfEdge *begin = Faces[0]->start_edge;
-    std::cout << "Id of the HE  : " << begin->id << std::endl;
-    HalfEdge *t = begin;
-    bool boundary_flag = false;
-    do
-    {
-        // std::cout << t->face->id << "\n";
-        std::cout << t->vertex->id << " ";
-        t = t->nextHalfEdge;
-
-    } while (t != begin);
 }
+void MeshHE::associate_vertices(MeshVertex *vert, std::pair<int, int> edge)
+{
+    if (vert->edge == NULL)
+    {
+        vert->edge = Edges[edge];
+    }
+}
+
 void MeshHE::parse()
 {
     std::ifstream infile(filename);
@@ -122,4 +108,37 @@ void MeshHE::parse()
             indices.push_back(std::make_tuple(x, y, z));
         }
     }
+}
+
+void MeshHE::perform_cut(glm::vec2 p0, glm::vec2 p1)
+{
+    /*
+    1. find which face does p0 belong to
+    2. perform intersection of p0p1 and one edge of the triangle
+    3. two specific cases may arise 
+    4. perform half edge operations which are case specific
+    */
+    glm::vec2 v1, v2, v3;
+    std::vector<glm::vec2> pos;
+    for (auto face : Faces)
+    {
+        get_triangle_positions_from_face(face, pos);
+        std::cout << "FACE vert count <always 3> : " << pos.size() << "\n";
+        std::cout << glm::to_string(pos[0]) << "\n";
+        std::cout << glm::to_string(pos[1]) << "\n";
+        std::cout << glm::to_string(pos[2]) << "\n";
+        pos.clear();
+        // assert(x == 7);
+    }
+}
+
+void MeshHE::get_triangle_positions_from_face(MeshFace *f, std::vector<glm::vec2> &positions)
+{
+    HalfEdge *beg = f->start_edge, *t;
+    t = beg;
+    do
+    {
+        positions.push_back(glm::vec2(t->vertex->position));
+        t = t->nextHalfEdge;
+    } while (t != beg);
 }

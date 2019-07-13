@@ -170,9 +170,11 @@
 
 int main()
 {
-    MeshHE *mymesh = new MeshHE("./data/mydata.obj");
+    // MeshHE *mymesh = new MeshHE("./data/mydata.obj");
+    MeshHE *mymesh = new MeshHE("./data/strip.obj");
     mymesh->create_half_edge_mesh();
-    mymesh->perform_cut(glm::vec2(-0.5, 2.8), glm::vec2(3.0, -1.5));
+    // mymesh->perform_cut(glm::vec2(-0.5, 2.8), glm::vec2(2.0, -1.5));
+    mymesh->perform_cut(glm::vec2(1.5, 2.0), glm::vec2(6.0, 1.8));
     // std::cout << "hello";
     // extract mesh
 

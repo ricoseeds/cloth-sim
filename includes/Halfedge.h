@@ -89,6 +89,7 @@ public:
     void associate_vertices(MeshVertex *vert, std::pair<int, int> edge);
     void perform_cut(glm::vec2 p0, glm::vec2 p1);
     void get_triangle_positions_from_face(MeshFace *f, std::vector<glm::vec2> &positions);
+    void determine_start_and_end_faces(HalfEdge *&begin_cut, HalfEdge *&last_he, glm::vec2 p0, glm::vec2 p1);
 };
 
 #endif

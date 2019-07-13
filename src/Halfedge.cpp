@@ -113,22 +113,23 @@ void MeshHE::parse()
 void MeshHE::perform_cut(glm::vec2 p0, glm::vec2 p1)
 {
     /*
-    1. find which face does p0 belong to
+    1. find which face does p0 and p1 belong to
     2. perform intersection of p0p1 and one edge of the triangle
     3. two specific cases may arise 
     4. perform half edge operations which are case specific
     */
-    glm::vec2 v1, v2, v3;
-    std::vector<glm::vec2> pos;
-    for (auto face : Faces)
+
+    //1->
+    HalfEdge *begin_cut = NULL;
+    HalfEdge *last_he = NULL;
+    determine_start_and_end_faces(begin_cut, last_he, p0, p1);
+    if (begin_cut != NULL)
     {
-        get_triangle_positions_from_face(face, pos);
-        std::cout << "FACE vert count <always 3> : " << pos.size() << "\n";
-        std::cout << glm::to_string(pos[0]) << "\n";
-        std::cout << glm::to_string(pos[1]) << "\n";
-        std::cout << glm::to_string(pos[2]) << "\n";
-        pos.clear();
-        // assert(x == 7);
+        std::cout << " Id of the face in which the point is : " << begin_cut->face->id << "\n";
+    }
+    if (last_he != NULL)
+    {
+        std::cout << " Id of the face in which the point is : " << last_he->face->id << "\n";
     }
 }
 
@@ -141,4 +142,35 @@ void MeshHE::get_triangle_positions_from_face(MeshFace *f, std::vector<glm::vec2
         positions.push_back(glm::vec2(t->vertex->position));
         t = t->nextHalfEdge;
     } while (t != beg);
+}
+
+void MeshHE::determine_start_and_end_faces(HalfEdge *&begin_cut, HalfEdge *&last_he, glm::vec2 p0, glm::vec2 p1)
+{
+    // std::cout << " Enter " << Faces.size();
+    std::vector<glm::vec2> tri_pos;
+    bool first_point_found = false;
+    bool last_point_found = false;
+    for (auto face : Faces)
+    {
+        get_triangle_positions_from_face(face, tri_pos);
+        assert(tri_pos.size() == 3);
+        if (!first_point_found && geometry_k::point_in_tri(p0, tri_pos[0], tri_pos[1], tri_pos[2]))
+        {
+            first_point_found = true;
+            begin_cut = face->start_edge;
+            // break;
+        }
+        if (!last_point_found && geometry_k::point_in_tri(p1, tri_pos[0], tri_pos[1], tri_pos[2]))
+        {
+            last_point_found = true;
+            last_he = face->start_edge;
+            // break;
+        }
+        if (first_point_found && last_point_found)
+        {
+            tri_pos.clear();
+            break;
+        }
+        tri_pos.clear();
+    }
 }

@@ -24,6 +24,7 @@
 
 
 
+    mymesh->perform_cut(glm::vec2(-0.5, 2.8), glm::vec2(2.3, -2.0));
 
 //face
     HalfEdge *begin = Faces[0]->start_edge;
@@ -63,3 +64,29 @@ HalfEdge *begin = Faces[5]->start_edge;
     std::cout << glm::to_string(t->prevHalfEdge->prevHalfEdge->prevHalfEdge->vertex->position) << std::endl; // shouldbe same as t -> id
     std::cout << "id Opposite to he 6 : " << t->nextHalfEdge->nextHalfEdge->pairHalfEdge->id << "\n";
  
+ 
+ 
+ 
+ //deducing faces
+
+   // if (begin_cut->pairHalfEdge != NULL)
+    // {
+    //     std::cout << begin_cut->pairHalfEdge->face->id;
+    // }
+    // if (begin_cut->nextHalfEdge->pairHalfEdge != NULL)
+    // {
+    //     std::cout << begin_cut->nextHalfEdge->pairHalfEdge->face->id;
+    // }
+    // if (begin_cut->nextHalfEdge->nextHalfEdge->pairHalfEdge != NULL)
+    // {
+    //     std::cout << begin_cut->nextHalfEdge->nextHalfEdge->pairHalfEdge->face->id;
+    // }
+
+    // if (first_point_found)
+    // {
+    //     std::cout << " Id of the face in which the point is : " << begin_cut->face->id << "\n";
+    // }
+    // if (last_point_found)
+    // {
+    //     std::cout << " Id of the face in which the point is : " << last_he->face->id << "\n";
+    // }

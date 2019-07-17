@@ -90,3 +90,151 @@ HalfEdge *begin = Faces[5]->start_edge;
     // {
     //     std::cout << " Id of the face in which the point is : " << last_he->face->id << "\n";
     // }
+
+
+
+     for (auto face : indices)
+    {
+        MeshFace *newFace = new MeshFace(face_count);
+        std::pair<int, int> edge1;
+        std::pair<int, int> edge2;
+        std::pair<int, int> edge3;
+        edge1 = std::make_pair(std::get<0>(face), std::get<1>(face));
+        edge2 = std::make_pair(std::get<1>(face), std::get<2>(face));
+        edge3 = std::make_pair(std::get<2>(face), std::get<0>(face));
+        Edges[edge1] = std::move(new HalfEdge(he_count));
+        Edges[edge1]->edge_pair = edge1;
+        Edges[edge2] = std::move(new HalfEdge(he_count + 1));
+        Edges[edge2]->edge_pair = edge2;
+        Edges[edge3] = std::move(new HalfEdge(he_count + 2));
+        Edges[edge3]->edge_pair = edge3;
+        he_count += 3;
+        newFace->start_edge = Edges[edge1];
+        // perform the next edge connection
+        Edges[edge1]->nextHalfEdge = Edges[edge2];
+        Edges[edge2]->nextHalfEdge = Edges[edge3];
+        Edges[edge3]->nextHalfEdge = Edges[edge1];
+        // perform prev edge connection
+        Edges[edge1]->prevHalfEdge = Edges[edge3];
+        Edges[edge3]->prevHalfEdge = Edges[edge2];
+        Edges[edge2]->prevHalfEdge = Edges[edge1];
+        // halfedge pointing to vertices
+        Edges[edge1]->vertex = Vertices[std::get<0>(face) - 1];
+        Edges[edge2]->vertex = Vertices[std::get<1>(face) - 1];
+        Edges[edge3]->vertex = Vertices[std::get<2>(face) - 1];
+        // halfedge pointing to faces
+        Edges[edge1]->face = newFace;
+        Edges[edge2]->face = newFace;
+        Edges[edge3]->face = newFace;
+        associate_vertices(Vertices[std::get<0>(face) - 1], edge1);
+        associate_vertices(Vertices[std::get<1>(face) - 1], edge2);
+        associate_vertices(Vertices[std::get<2>(face) - 1], edge3);
+        // perform the  connections
+        if (Edges.find(std::pair(edge1.second, edge1.first)) != Edges.end())
+        {
+            // std::cout << "hit\n";
+            Edges[edge1]->pairHalfEdge = Edges[std::pair(edge1.second, edge1.first)];
+            Edges[edge1]->boundary = false;
+            Edges[std::pair(edge1.second, edge1.first)]->pairHalfEdge = Edges[edge1];
+            Edges[std::pair(edge1.second, edge1.first)]->boundary = false;
+        }
+        if (Edges.find(std::pair(edge2.second, edge2.first)) != Edges.end())
+        {
+            // std::cout << "hit\n";
+            Edges[edge2]->pairHalfEdge = Edges[std::pair(edge2.second, edge2.first)];
+            Edges[edge2]->boundary = false;
+            Edges[std::pair(edge2.second, edge2.first)]->pairHalfEdge = Edges[edge2];
+            Edges[std::pair(edge2.second, edge2.first)]->boundary = false;
+        }
+        if (Edges.find(std::pair(edge3.second, edge3.first)) != Edges.end())
+        {
+            // std::cout << "hit\n";
+            Edges[edge3]->pairHalfEdge = Edges[std::pair(edge3.second, edge3.first)];
+            Edges[edge3]->boundary = false;
+            Edges[std::pair(edge3.second, edge3.first)]->pairHalfEdge = Edges[edge3];
+            Edges[std::pair(edge3.second, edge3.first)]->boundary = false;
+        }
+        // push back faces, half edges and vertices
+        HalfEdges.push_back(Edges[edge1]);
+        HalfEdges.push_back(Edges[edge2]);
+        HalfEdges.push_back(Edges[edge3]);
+        Faces.push_back(newFace);
+        face_count++;
+    }
+    // HalfEdge *t = Faces[0]->start_edge;
+    // HalfEdge *y = t;
+    // do
+    // {
+    //     std::cout << "VERTEX ID OF FACE :" << y->vertex->id << " \n";
+    //     y = y->nextHalfEdge;
+    // } while (y != t);
+
+
+
+      if (begin_cut != NULL && last_he != NULL && begin_cut->face->id != last_he->face->id) //ideally begin_cut != NULL but this is done for simplification
+    {
+        std::vector<MeshFace *> touched_faces;
+        t = begin_cut;
+        std::cout << "begin\n";
+        std::cout << "FIRST face " << begin_cut->face->id << "\n";
+        std::cout << "END face " << last_he->face->id << "\n";
+        HalfEdge *a, *b, *c;
+        a = t;
+        b = t->nextHalfEdge;
+        c = t->nextHalfEdge->nextHalfEdge;
+        glm::vec2 apos, bpos, cpos;
+        apos = glm::vec2(a->vertex->position);
+        bpos = glm::vec2(b->vertex->position);
+        cpos = glm::vec2(c->vertex->position);
+        std::cout << " A " << glm::to_string(apos) << "\n";
+        std::cout << " B " << glm::to_string(bpos) << "\n";
+        std::cout << " C " << glm::to_string(cpos) << "\n";
+        bool ed1 = geometry_k::get_line_intersection(p0, p1, apos, bpos, &x1, &y1);
+        bool ed2 = geometry_k::get_line_intersection(p0, p1, bpos, cpos, &x2, &y2);
+        bool ed3 = geometry_k::get_line_intersection(p0, p1, cpos, apos, &x3, &y3);
+        if (ed1)
+        {
+
+            std::cout << "AB intersects : " << x1 << " " << y1 << "\n";
+            std::cout << "A id : " << a->id << "A pair id : " << a->pairHalfEdge->id << "\n";
+            t = a->pairHalfEdge;
+        }
+        if (ed2)
+        {
+            std::cout << "BC intersects : " << x2 << " " << y2 << "\n";
+            std::cout << "B id : " << b->id << "B pair id : " << b->pairHalfEdge->id << "\n";
+            t = b->pairHalfEdge;
+        }
+        if (ed3)
+        {
+            std::cout << "CA intersects : " << x3 << " " << y3 << "\n";
+            std::cout << "C id : " << c->id << "C pair id : " << c->pairHalfEdge->id << "\n";
+            t = c->pairHalfEdge;
+        }
+        // t = b->pairHalfEdge;
+
+        // std::cout << "AB " << glm::to_string(a->vertex->position) << " :: " << glm::to_string(b->vertex->position) << "\n";
+        // std::cout << "BC " << glm::to_string(b->vertex->position) << " :: " << glm::to_string(c->vertex->position) << "\n";
+        // std::cout << "CA " << glm::to_string(c->vertex->position) << " :: " << glm::to_string(a->vertex->position) << "\n";
+        std::cout
+            << " TOUCHED FACES";
+        for (auto f : touched_faces)
+        {
+            std::cout << f->id << " ";
+        }
+
+        // do
+        // {
+        //     p2 = glm::vec2(t->vertex->position);
+        //     p3 = glm::vec2(t->nextHalfEdge->vertex->position);
+        //     float x, y;
+        //     if (geometry_k::get_line_intersection(p0, p1, p2, p3, &x, &y))
+        //     {
+        //         std::cout << " x, y = " << x << ", " << y << "\n";
+        //         int vcounter = Vertices.size();
+        //         Vertices.push_back(std::move(new MeshVertex(vcounter + 1, glm::vec3(p0.x, p0.y, 0.0))));
+        //         Vertices.push_back(std::move(new MeshVertex(vcounter + 2, glm::vec3(x, y, 0.0))));
+        //     }
+        //     t = t->nextHalfEdge;
+        // } while (t != begin_cut);
+    }

@@ -175,6 +175,7 @@ int main()
     mymesh->create_half_edge_mesh();
     // mymesh->perform_cut(glm::vec2(-0.5, 2.8), glm::vec2(2.0, -1.5));
     mymesh->perform_cut(glm::vec2(1.5, 2.0), glm::vec2(6.0, 1.8));
+    mymesh->print_as_wavefront_obj();
     // std::cout << "hello";
     // extract mesh
 

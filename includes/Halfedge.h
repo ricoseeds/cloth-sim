@@ -33,10 +33,16 @@ public:
     int id;
     glm::vec3 normal;
     HalfEdge *start_edge; // one of the half-edges bordering the face
+    bool deleted;
     MeshFace(int id)
     {
         start_edge = NULL;
+        deleted = false;
         this->id = id;
+    }
+    void set_delete()
+    {
+        this->deleted = true;
     }
 };
 
@@ -49,8 +55,9 @@ public:
     HalfEdge *prevHalfEdge;
     MeshVertex *vertex; // todo
     MeshFace *face;
-    std::pair<int, int> edge_pair;
+    std::pair<unsigned int, unsigned int> edge_pair;
     bool boundary;
+    bool deleted;
     HalfEdge()
     {
         face = NULL;
@@ -59,6 +66,7 @@ public:
         pairHalfEdge = NULL;
         prevHalfEdge = NULL;
         id = -1;
+        deleted = false;
     }
     HalfEdge(int id)
     {
@@ -69,13 +77,19 @@ public:
         prevHalfEdge = NULL;
         this->id = id;
         this->boundary = true;
+        deleted = false;
     }
     void set_id(int id) { this->id = id; }
+    void set_delete()
+    {
+        this->deleted = true;
+    }
 };
 
 class MeshHE
 {
 public:
+    // for performance improvement make them all maps
     std::vector<MeshVertex *> Vertices;
     std::vector<HalfEdge *> HalfEdges;
     std::vector<MeshFace *> Faces;
@@ -90,6 +104,7 @@ public:
     void perform_cut(glm::vec2 p0, glm::vec2 p1);
     void get_triangle_positions_from_face(MeshFace *f, std::vector<glm::vec2> &positions);
     void determine_start_and_end_faces(HalfEdge *&begin_cut, HalfEdge *&last_he, glm::vec2 p0, glm::vec2 p1);
+    void print_as_wavefront_obj();
 };
 
 #endif

@@ -105,6 +105,8 @@ public:
     void get_triangle_positions_from_face(MeshFace *f, std::vector<glm::vec2> &positions);
     void determine_start_and_end_faces(HalfEdge *&begin_cut, HalfEdge *&last_he, glm::vec2 p0, glm::vec2 p1);
     void print_as_wavefront_obj();
+    void do_next_prev_connections(HalfEdge *&he1, HalfEdge *&he2, HalfEdge *&he3);
+    void assign_opposite_he(std::map<std::pair<unsigned int, unsigned int>, HalfEdge *> &temp_edge_map, HalfEdge *&he);
 };
 
 #endif

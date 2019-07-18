@@ -188,27 +188,11 @@ void MeshHE::perform_cut(glm::vec2 p0, glm::vec2 p1)
         HalfEdge *broken_he3_3 = new HalfEdge(he_count + 8);
         he_count += 9;
         //first face HE next and prev connections
-        broken_he1_1->nextHalfEdge = broken_he1_2;
-        broken_he1_2->nextHalfEdge = broken_he1_3;
-        broken_he1_3->nextHalfEdge = broken_he1_1;
-        broken_he1_1->prevHalfEdge = broken_he1_3;
-        broken_he1_2->prevHalfEdge = broken_he1_1;
-        broken_he1_3->prevHalfEdge = broken_he1_2;
+        do_next_prev_connections(broken_he1_1, broken_he1_2, broken_he1_3);
         // second face HE next and prev connections
-        broken_he2_1->nextHalfEdge = broken_he2_2;
-        broken_he2_2->nextHalfEdge = broken_he2_3;
-        broken_he2_3->nextHalfEdge = broken_he2_1;
-        broken_he2_1->prevHalfEdge = broken_he2_3;
-        broken_he2_2->prevHalfEdge = broken_he2_1;
-        broken_he2_3->prevHalfEdge = broken_he2_2;
+        do_next_prev_connections(broken_he2_1, broken_he2_2, broken_he2_3);
         //third face HE next and prev connections
-        broken_he3_1->nextHalfEdge = broken_he3_2;
-        broken_he3_2->nextHalfEdge = broken_he3_3;
-        broken_he3_3->nextHalfEdge = broken_he3_1;
-        broken_he3_1->prevHalfEdge = broken_he3_3;
-        broken_he3_2->prevHalfEdge = broken_he3_1;
-        broken_he3_3->prevHalfEdge = broken_he3_2;
-
+        do_next_prev_connections(broken_he3_1, broken_he3_2, broken_he3_3);
         // v1 v2 new_vert
         int face_count = Faces.size();
         MeshFace *new_face_1 = new MeshFace(face_count);
@@ -225,27 +209,9 @@ void MeshHE::perform_cut(glm::vec2 p0, glm::vec2 p1)
         temp_edge_map[std::make_pair(v1->id, v2->id)] = broken_he1_1;
         temp_edge_map[std::make_pair(v2->id, new_vert->id)] = broken_he1_2;
         temp_edge_map[std::make_pair(new_vert->id, v1->id)] = broken_he1_3;
-        if (temp_edge_map.find(std::pair(broken_he1_1->edge_pair.second, broken_he1_1->edge_pair.first)) != temp_edge_map.end())
-        {
-            temp_edge_map[broken_he1_1->edge_pair]->pairHalfEdge = temp_edge_map[std::pair(broken_he1_1->edge_pair.second, broken_he1_1->edge_pair.first)];
-            temp_edge_map[broken_he1_1->edge_pair]->boundary = false;
-            temp_edge_map[std::pair(broken_he1_1->edge_pair.second, broken_he1_1->edge_pair.first)]->pairHalfEdge = temp_edge_map[broken_he1_1->edge_pair];
-            temp_edge_map[std::pair(broken_he1_1->edge_pair.second, broken_he1_1->edge_pair.first)]->boundary = false;
-        }
-        if (temp_edge_map.find(std::pair(broken_he1_2->edge_pair.second, broken_he1_2->edge_pair.first)) != temp_edge_map.end())
-        {
-            temp_edge_map[broken_he1_2->edge_pair]->pairHalfEdge = temp_edge_map[std::pair(broken_he1_2->edge_pair.second, broken_he1_2->edge_pair.first)];
-            temp_edge_map[broken_he1_2->edge_pair]->boundary = false;
-            temp_edge_map[std::pair(broken_he1_2->edge_pair.second, broken_he1_2->edge_pair.first)]->pairHalfEdge = temp_edge_map[broken_he1_2->edge_pair];
-            temp_edge_map[std::pair(broken_he1_2->edge_pair.second, broken_he1_2->edge_pair.first)]->boundary = false;
-        }
-        if (temp_edge_map.find(std::pair(broken_he1_3->edge_pair.second, broken_he1_3->edge_pair.first)) != temp_edge_map.end())
-        {
-            temp_edge_map[broken_he1_3->edge_pair]->pairHalfEdge = temp_edge_map[std::pair(broken_he1_3->edge_pair.second, broken_he1_3->edge_pair.first)];
-            temp_edge_map[broken_he1_3->edge_pair]->boundary = false;
-            temp_edge_map[std::pair(broken_he1_3->edge_pair.second, broken_he1_3->edge_pair.first)]->pairHalfEdge = temp_edge_map[broken_he1_3->edge_pair];
-            temp_edge_map[std::pair(broken_he1_3->edge_pair.second, broken_he1_3->edge_pair.first)]->boundary = false;
-        }
+        assign_opposite_he(temp_edge_map, broken_he1_1);
+        assign_opposite_he(temp_edge_map, broken_he1_2);
+        assign_opposite_he(temp_edge_map, broken_he1_3);
         // v3 v1 new_vert
         MeshFace *new_face_2 = new MeshFace(face_count + 1);
         new_face_2->start_edge = broken_he2_1;
@@ -261,27 +227,9 @@ void MeshHE::perform_cut(glm::vec2 p0, glm::vec2 p1)
         temp_edge_map[std::make_pair(v3->id, v1->id)] = broken_he2_1;
         temp_edge_map[std::make_pair(v1->id, new_vert->id)] = broken_he2_2;
         temp_edge_map[std::make_pair(new_vert->id, v3->id)] = broken_he2_3;
-        if (temp_edge_map.find(std::pair(broken_he2_1->edge_pair.second, broken_he2_1->edge_pair.first)) != temp_edge_map.end())
-        {
-            temp_edge_map[broken_he2_1->edge_pair]->pairHalfEdge = temp_edge_map[std::pair(broken_he2_1->edge_pair.second, broken_he2_1->edge_pair.first)];
-            temp_edge_map[broken_he2_1->edge_pair]->boundary = false;
-            temp_edge_map[std::pair(broken_he2_1->edge_pair.second, broken_he2_1->edge_pair.first)]->pairHalfEdge = temp_edge_map[broken_he2_1->edge_pair];
-            temp_edge_map[std::pair(broken_he2_1->edge_pair.second, broken_he2_1->edge_pair.first)]->boundary = false;
-        }
-        if (temp_edge_map.find(std::pair(broken_he2_2->edge_pair.second, broken_he2_2->edge_pair.first)) != temp_edge_map.end())
-        {
-            temp_edge_map[broken_he2_2->edge_pair]->pairHalfEdge = temp_edge_map[std::pair(broken_he2_2->edge_pair.second, broken_he2_2->edge_pair.first)];
-            temp_edge_map[broken_he2_2->edge_pair]->boundary = false;
-            temp_edge_map[std::pair(broken_he2_2->edge_pair.second, broken_he2_2->edge_pair.first)]->pairHalfEdge = temp_edge_map[broken_he2_2->edge_pair];
-            temp_edge_map[std::pair(broken_he2_2->edge_pair.second, broken_he2_2->edge_pair.first)]->boundary = false;
-        }
-        if (temp_edge_map.find(std::pair(broken_he2_3->edge_pair.second, broken_he2_3->edge_pair.first)) != temp_edge_map.end())
-        {
-            temp_edge_map[broken_he2_3->edge_pair]->pairHalfEdge = temp_edge_map[std::pair(broken_he2_3->edge_pair.second, broken_he2_3->edge_pair.first)];
-            temp_edge_map[broken_he2_3->edge_pair]->boundary = false;
-            temp_edge_map[std::pair(broken_he2_3->edge_pair.second, broken_he2_3->edge_pair.first)]->pairHalfEdge = temp_edge_map[broken_he2_3->edge_pair];
-            temp_edge_map[std::pair(broken_he2_3->edge_pair.second, broken_he2_3->edge_pair.first)]->boundary = false;
-        }
+        assign_opposite_he(temp_edge_map, broken_he2_1);
+        assign_opposite_he(temp_edge_map, broken_he2_2);
+        assign_opposite_he(temp_edge_map, broken_he2_3);
         // v2 v3 new_vert
         MeshFace *new_face_3 = new MeshFace(face_count + 3);
         new_face_3->start_edge = broken_he3_1;
@@ -297,27 +245,10 @@ void MeshHE::perform_cut(glm::vec2 p0, glm::vec2 p1)
         temp_edge_map[std::make_pair(v2->id, v3->id)] = broken_he3_1;
         temp_edge_map[std::make_pair(v3->id, new_vert->id)] = broken_he3_2;
         temp_edge_map[std::make_pair(new_vert->id, v2->id)] = broken_he3_3;
-        if (temp_edge_map.find(std::pair(broken_he3_1->edge_pair.second, broken_he3_1->edge_pair.first)) != temp_edge_map.end())
-        {
-            temp_edge_map[broken_he3_1->edge_pair]->pairHalfEdge = temp_edge_map[std::pair(broken_he3_1->edge_pair.second, broken_he3_1->edge_pair.first)];
-            temp_edge_map[broken_he3_1->edge_pair]->boundary = false;
-            temp_edge_map[std::pair(broken_he3_1->edge_pair.second, broken_he3_1->edge_pair.first)]->pairHalfEdge = temp_edge_map[broken_he3_1->edge_pair];
-            temp_edge_map[std::pair(broken_he3_1->edge_pair.second, broken_he3_1->edge_pair.first)]->boundary = false;
-        }
-        if (temp_edge_map.find(std::pair(broken_he3_2->edge_pair.second, broken_he3_2->edge_pair.first)) != temp_edge_map.end())
-        {
-            temp_edge_map[broken_he3_2->edge_pair]->pairHalfEdge = temp_edge_map[std::pair(broken_he3_2->edge_pair.second, broken_he3_2->edge_pair.first)];
-            temp_edge_map[broken_he3_2->edge_pair]->boundary = false;
-            temp_edge_map[std::pair(broken_he3_2->edge_pair.second, broken_he3_2->edge_pair.first)]->pairHalfEdge = temp_edge_map[broken_he3_2->edge_pair];
-            temp_edge_map[std::pair(broken_he3_2->edge_pair.second, broken_he3_2->edge_pair.first)]->boundary = false;
-        }
-        if (temp_edge_map.find(std::pair(broken_he3_3->edge_pair.second, broken_he3_3->edge_pair.first)) != temp_edge_map.end())
-        {
-            temp_edge_map[broken_he3_3->edge_pair]->pairHalfEdge = temp_edge_map[std::pair(broken_he3_3->edge_pair.second, broken_he3_3->edge_pair.first)];
-            temp_edge_map[broken_he3_3->edge_pair]->boundary = false;
-            temp_edge_map[std::pair(broken_he3_3->edge_pair.second, broken_he3_3->edge_pair.first)]->pairHalfEdge = temp_edge_map[broken_he3_3->edge_pair];
-            temp_edge_map[std::pair(broken_he3_3->edge_pair.second, broken_he3_3->edge_pair.first)]->boundary = false;
-        }
+        assign_opposite_he(temp_edge_map, broken_he3_1);
+        assign_opposite_he(temp_edge_map, broken_he3_2);
+        assign_opposite_he(temp_edge_map, broken_he3_3);
+        //add back new faces and new halfedges
         face_count += 3;
         Faces.push_back(new_face_1);
         Faces.push_back(new_face_2);
@@ -332,6 +263,26 @@ void MeshHE::perform_cut(glm::vec2 p0, glm::vec2 p1)
         HalfEdges.push_back(broken_he3_2);
         HalfEdges.push_back(broken_he3_3);
     }
+}
+
+void MeshHE::assign_opposite_he(std::map<std::pair<unsigned int, unsigned int>, HalfEdge *> &temp_edge_map, HalfEdge *&he)
+{
+    if (temp_edge_map.find(std::pair(he->edge_pair.second, he->edge_pair.first)) != temp_edge_map.end())
+    {
+        temp_edge_map[he->edge_pair]->pairHalfEdge = temp_edge_map[std::pair(he->edge_pair.second, he->edge_pair.first)];
+        temp_edge_map[he->edge_pair]->boundary = false;
+        temp_edge_map[std::pair(he->edge_pair.second, he->edge_pair.first)]->pairHalfEdge = temp_edge_map[he->edge_pair];
+        temp_edge_map[std::pair(he->edge_pair.second, he->edge_pair.first)]->boundary = false;
+    }
+}
+void MeshHE::do_next_prev_connections(HalfEdge *&he1, HalfEdge *&he2, HalfEdge *&he3)
+{
+    he1->nextHalfEdge = he2;
+    he2->nextHalfEdge = he3;
+    he3->nextHalfEdge = he1;
+    he1->prevHalfEdge = he3;
+    he2->prevHalfEdge = he1;
+    he3->prevHalfEdge = he2;
 }
 
 void MeshHE::get_triangle_positions_from_face(MeshFace *f, std::vector<glm::vec2> &positions)
@@ -385,55 +336,54 @@ void MeshHE::determine_start_and_end_faces(HalfEdge *&begin_cut, HalfEdge *&last
     // }
 }
 
-void MeshHE::print_as_wavefront_obj(){
+void MeshHE::print_as_wavefront_obj()
+{
     for (size_t i = 0; i < Vertices.size(); i++)
     {
         std::cout << "v " << Vertices[i]->position.x << " " << Vertices[i]->position.y << " " << Vertices[i]->position.z << "\n";
     }
-    for (auto f:Faces)
+    for (auto f : Faces)
     {
-        if(!(f->deleted)){
-            HalfEdge* t = f->start_edge;
-            std::cout << "f " << t->vertex->id << " " << t->nextHalfEdge->vertex->id << " " <<t->nextHalfEdge->nextHalfEdge->vertex->id << "\n";
+        if (!(f->deleted))
+        {
+            HalfEdge *t = f->start_edge;
+            std::cout << "f " << t->vertex->id << " " << t->nextHalfEdge->vertex->id << " " << t->nextHalfEdge->nextHalfEdge->vertex->id << "\n";
         }
     }
-    
-    
-
 }
 
-    // do
-    // {
-    //     std::cout << t->face->id;
-    //     touched_faces.push_back(t->face);
-    //     HalfEdge *a, *b, *c;
-    //     a = t;
-    //     b = t->nextHalfEdge;
-    //     c = t->nextHalfEdge->nextHalfEdge;
-    //     // check ab bc ac -> which edge is intersecting
-    //     p2 = glm::vec2(a->vertex->position);
-    //     p3 = glm::vec2(c->vertex->position);
-    //     check_edge1 = geometry_k::get_line_intersection(p0, p1, p2, p3, &x1, &y1);
-    //     p2 = glm::vec2(c->vertex->position);
-    //     p3 = glm::vec2(b->vertex->position);
-    //     check_edge2 = geometry_k::get_line_intersection(p0, p1, p2, p3, &x2, &y2);
-    //     p2 = glm::vec2(b->vertex->position);
-    //     p3 = glm::vec2(a->vertex->position);
-    //     check_edge3 = geometry_k::get_line_intersection(p0, p1, p2, p3, &x3, &y3);
-    //     if (check_edge1)
-    //     {
-    //         // std::cout << "EDGE : " << a->id << "\n";
-    //         t = a->pairHalfEdge;
-    //     }
-    //     else if (check_edge2)
-    //     {
-    //         // std::cout << "EDGE : " << b->id << "\n";
-    //         t = c->pairHalfEdge;
-    //     }
-    //     else if (check_edge3)
-    //     {
-    //         // std::cout << "EDGE : " << c->id << "\n";
-    //         t = b->pairHalfEdge;
-    //     }
+// do
+// {
+//     std::cout << t->face->id;
+//     touched_faces.push_back(t->face);
+//     HalfEdge *a, *b, *c;
+//     a = t;
+//     b = t->nextHalfEdge;
+//     c = t->nextHalfEdge->nextHalfEdge;
+//     // check ab bc ac -> which edge is intersecting
+//     p2 = glm::vec2(a->vertex->position);
+//     p3 = glm::vec2(c->vertex->position);
+//     check_edge1 = geometry_k::get_line_intersection(p0, p1, p2, p3, &x1, &y1);
+//     p2 = glm::vec2(c->vertex->position);
+//     p3 = glm::vec2(b->vertex->position);
+//     check_edge2 = geometry_k::get_line_intersection(p0, p1, p2, p3, &x2, &y2);
+//     p2 = glm::vec2(b->vertex->position);
+//     p3 = glm::vec2(a->vertex->position);
+//     check_edge3 = geometry_k::get_line_intersection(p0, p1, p2, p3, &x3, &y3);
+//     if (check_edge1)
+//     {
+//         // std::cout << "EDGE : " << a->id << "\n";
+//         t = a->pairHalfEdge;
+//     }
+//     else if (check_edge2)
+//     {
+//         // std::cout << "EDGE : " << b->id << "\n";
+//         t = c->pairHalfEdge;
+//     }
+//     else if (check_edge3)
+//     {
+//         // std::cout << "EDGE : " << c->id << "\n";
+//         t = b->pairHalfEdge;
+//     }
 
-    // } while (t->face->id != last_he->face->id);
+// } while (t->face->id != last_he->face->id);

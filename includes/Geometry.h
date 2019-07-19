@@ -1,6 +1,7 @@
 #ifndef GEOMETRY_H
 #define GEOMETRY_H
 #include "glm/glm.hpp"
+#include <cmath>
 
 namespace geometry_k
 {

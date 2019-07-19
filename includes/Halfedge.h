@@ -34,15 +34,21 @@ public:
     glm::vec3 normal;
     HalfEdge *start_edge; // one of the half-edges bordering the face
     bool deleted;
+    bool dest_face;
     MeshFace(int id)
     {
         start_edge = NULL;
         deleted = false;
         this->id = id;
+        dest_face = false;
     }
     void set_delete()
     {
         this->deleted = true;
+    }
+    void set_dest_face()
+    {
+        this->dest_face = true;
     }
 };
 
@@ -58,6 +64,7 @@ public:
     std::pair<unsigned int, unsigned int> edge_pair;
     bool boundary;
     bool deleted;
+    bool processed;
     HalfEdge()
     {
         face = NULL;
@@ -67,6 +74,7 @@ public:
         prevHalfEdge = NULL;
         id = -1;
         deleted = false;
+        processed = false;
     }
     HalfEdge(int id)
     {
@@ -78,11 +86,16 @@ public:
         this->id = id;
         this->boundary = true;
         deleted = false;
+        processed = false;
     }
     void set_id(int id) { this->id = id; }
     void set_delete()
     {
         this->deleted = true;
+    }
+    void set_processed()
+    {
+        this->processed = true;
     }
 };
 
@@ -106,7 +119,11 @@ public:
     void determine_start_and_end_faces(HalfEdge *&begin_cut, HalfEdge *&last_he, glm::vec2 p0, glm::vec2 p1);
     void print_as_wavefront_obj();
     void do_next_prev_connections(HalfEdge *&he1, HalfEdge *&he2, HalfEdge *&he3);
+    void do_face_connections(HalfEdge *&he1, MeshFace *&f);
     void assign_opposite_he(std::map<std::pair<unsigned int, unsigned int>, HalfEdge *> &temp_edge_map, HalfEdge *&he);
+    void update_map(std::map<std::pair<unsigned int, unsigned int>, HalfEdge *> &edge_map, HalfEdge *&he);
+    void vertex_inside_triangle_connections(HalfEdge *&, glm::vec2, bool);
+    void do_pair_connection(HalfEdge *&, HalfEdge *&);
 };
 
 #endif

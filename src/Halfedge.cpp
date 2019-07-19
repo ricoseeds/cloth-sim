@@ -1,5 +1,33 @@
 #include "../includes/Halfedge.h"
 
+void MeshHE::parse()
+{
+    std::ifstream infile(filename);
+    std::string line;
+    glm::vec3 temp;
+    int vcounter = 1;
+
+    while (std::getline(infile, line))
+    {
+        std::stringstream ss(line);
+        std::string type;
+        ss >> type;
+        if (type == "v")
+        {
+            float a, b, c;
+            ss >> a >> b >> c;
+            Vertices.push_back(std::move(new MeshVertex(vcounter, glm::vec3(a, b, c))));
+            vcounter++;
+        }
+        if (type == "f")
+        {
+            int x, y, z;
+            ss >> x >> y >> z;
+            indices.push_back(std::make_tuple(x, y, z));
+        }
+    }
+}
+
 void MeshHE::create_half_edge_mesh()
 {
     parse();
@@ -91,178 +119,82 @@ void MeshHE::associate_vertices(MeshVertex *vert, std::pair<int, int> edge)
     }
 }
 
-void MeshHE::parse()
-{
-    std::ifstream infile(filename);
-    std::string line;
-    glm::vec3 temp;
-    int vcounter = 1;
-
-    while (std::getline(infile, line))
-    {
-        std::stringstream ss(line);
-        std::string type;
-        ss >> type;
-        if (type == "v")
-        {
-            float a, b, c;
-            ss >> a >> b >> c;
-            Vertices.push_back(std::move(new MeshVertex(vcounter, glm::vec3(a, b, c))));
-            vcounter++;
-        }
-        if (type == "f")
-        {
-            int x, y, z;
-            ss >> x >> y >> z;
-            indices.push_back(std::make_tuple(x, y, z));
-        }
-    }
-}
-
 void MeshHE::perform_cut(glm::vec2 p0, glm::vec2 p1)
 {
-    /*
-    1. find which face does p0 and p1 belong to
-    2. perform intersection of p0p1 and one edge of the triangle
-    3. two specific cases may arise 
-    4. perform half edge operations which are case specific
-    */
-
-    //1->
     HalfEdge *begin_cut = NULL;
     HalfEdge *last_he = NULL;
-    glm::vec2 p2, p3;
-    float x1, y1, x2, y2, x3, y3;
-    bool check_edge1, check_edge2, check_edge3;
-    determine_start_and_end_faces(begin_cut, last_he, p0, p1);
-    HalfEdge *t = begin_cut;
-    int vcounter = Vertices.size() + 1;                                                   // original indices
-    if (begin_cut != NULL && last_he != NULL && begin_cut->face->id != last_he->face->id) //ideally begin_cut != NULL but this is done for simplification
-    {
-        std::map<std::pair<unsigned int, unsigned int>, HalfEdge *> temp_edge_map;
+    determine_start_and_end_faces(begin_cut, last_he, p0, p1); // would be a good idea to decouple
+    vertex_inside_triangle_connections(begin_cut, p0, false);
+    vertex_inside_triangle_connections(last_he, p1, true);
+}
 
-        //perform cut until currentface->face->id != last_he->face->id
-        if (t->face->id == begin_cut->face->id)
-        {
-            HalfEdge *opp_edge1 = t->pairHalfEdge;
-            HalfEdge *opp_edge2 = t->nextHalfEdge->pairHalfEdge;
-            HalfEdge *opp_edge3 = t->nextHalfEdge->nextHalfEdge->pairHalfEdge;
-            // save the boundary edges
-            // temp_edge_map[opp_edge1->edge_pair] = NULL;
-            // temp_edge_map[opp_edge2->edge_pair] = NULL;
-            // temp_edge_map[opp_edge3->edge_pair] = NULL;
-            if (opp_edge1 != NULL)
-            {
-                temp_edge_map[opp_edge1->edge_pair] = opp_edge1;
-            }
-            if (opp_edge2 != NULL)
-            {
-                temp_edge_map[opp_edge2->edge_pair] = opp_edge2;
-            }
-            if (opp_edge3 != NULL)
-            {
-                temp_edge_map[opp_edge3->edge_pair] = opp_edge3;
-            }
-        }
-        Vertices.push_back(std::move(new MeshVertex(vcounter, glm::vec3(p0.x, p0.y, 0.0))));
-        t->face->set_delete(); // delete the face
-        t->set_delete();
-        t->nextHalfEdge->set_delete();
-        t->nextHalfEdge->nextHalfEdge->set_delete();
-        MeshVertex *v1, *v2, *v3, *new_vert;
-        // for this project vertex pointers are not important still doing it to maintain consistency
-        v1 = t->vertex;
-        v2 = t->nextHalfEdge->vertex;
-        v3 = t->nextHalfEdge->nextHalfEdge->vertex;
-        new_vert = Vertices[Vertices.size() - 1];
-        // make the new half edges
-        int he_count = HalfEdges.size();
-        HalfEdge *broken_he1_1 = new HalfEdge(he_count);
-        HalfEdge *broken_he1_2 = new HalfEdge(he_count + 1);
-        HalfEdge *broken_he1_3 = new HalfEdge(he_count + 2);
-        HalfEdge *broken_he2_1 = new HalfEdge(he_count + 3);
-        HalfEdge *broken_he2_2 = new HalfEdge(he_count + 4);
-        HalfEdge *broken_he2_3 = new HalfEdge(he_count + 5);
-        HalfEdge *broken_he3_1 = new HalfEdge(he_count + 6);
-        HalfEdge *broken_he3_2 = new HalfEdge(he_count + 7);
-        HalfEdge *broken_he3_3 = new HalfEdge(he_count + 8);
-        he_count += 9;
-        //first face HE next and prev connections
-        do_next_prev_connections(broken_he1_1, broken_he1_2, broken_he1_3);
-        // second face HE next and prev connections
-        do_next_prev_connections(broken_he2_1, broken_he2_2, broken_he2_3);
-        //third face HE next and prev connections
-        do_next_prev_connections(broken_he3_1, broken_he3_2, broken_he3_3);
-        // v1 v2 new_vert
-        int face_count = Faces.size();
-        MeshFace *new_face_1 = new MeshFace(face_count);
-        new_face_1->start_edge = broken_he1_1;
-        broken_he1_1->face = new_face_1;
-        broken_he1_2->face = new_face_1;
-        broken_he1_3->face = new_face_1;
-        broken_he1_1->vertex = v1;
-        broken_he1_2->vertex = v2;
-        broken_he1_3->vertex = new_vert;
-        broken_he1_1->edge_pair = std::make_pair(v1->id, v2->id);
-        broken_he1_2->edge_pair = std::make_pair(v2->id, new_vert->id);
-        broken_he1_3->edge_pair = std::make_pair(new_vert->id, v1->id);
-        temp_edge_map[std::make_pair(v1->id, v2->id)] = broken_he1_1;
-        temp_edge_map[std::make_pair(v2->id, new_vert->id)] = broken_he1_2;
-        temp_edge_map[std::make_pair(new_vert->id, v1->id)] = broken_he1_3;
-        assign_opposite_he(temp_edge_map, broken_he1_1);
-        assign_opposite_he(temp_edge_map, broken_he1_2);
-        assign_opposite_he(temp_edge_map, broken_he1_3);
-        // v3 v1 new_vert
-        MeshFace *new_face_2 = new MeshFace(face_count + 1);
-        new_face_2->start_edge = broken_he2_1;
-        broken_he2_1->face = new_face_2;
-        broken_he2_2->face = new_face_2;
-        broken_he2_3->face = new_face_2;
-        broken_he2_1->vertex = v3;
-        broken_he2_2->vertex = v1;
-        broken_he2_3->vertex = new_vert;
-        broken_he2_1->edge_pair = std::make_pair(v3->id, v1->id);
-        broken_he2_2->edge_pair = std::make_pair(v1->id, new_vert->id);
-        broken_he2_3->edge_pair = std::make_pair(new_vert->id, v3->id);
-        temp_edge_map[std::make_pair(v3->id, v1->id)] = broken_he2_1;
-        temp_edge_map[std::make_pair(v1->id, new_vert->id)] = broken_he2_2;
-        temp_edge_map[std::make_pair(new_vert->id, v3->id)] = broken_he2_3;
-        assign_opposite_he(temp_edge_map, broken_he2_1);
-        assign_opposite_he(temp_edge_map, broken_he2_2);
-        assign_opposite_he(temp_edge_map, broken_he2_3);
-        // v2 v3 new_vert
-        MeshFace *new_face_3 = new MeshFace(face_count + 3);
-        new_face_3->start_edge = broken_he3_1;
-        broken_he3_1->face = new_face_3;
-        broken_he3_2->face = new_face_3;
-        broken_he3_3->face = new_face_3;
-        broken_he3_1->vertex = v2;
-        broken_he3_2->vertex = v3;
-        broken_he3_3->vertex = new_vert;
-        broken_he3_1->edge_pair = std::make_pair(v2->id, v3->id);
-        broken_he3_2->edge_pair = std::make_pair(v3->id, new_vert->id);
-        broken_he3_3->edge_pair = std::make_pair(new_vert->id, v2->id);
-        temp_edge_map[std::make_pair(v2->id, v3->id)] = broken_he3_1;
-        temp_edge_map[std::make_pair(v3->id, new_vert->id)] = broken_he3_2;
-        temp_edge_map[std::make_pair(new_vert->id, v2->id)] = broken_he3_3;
-        assign_opposite_he(temp_edge_map, broken_he3_1);
-        assign_opposite_he(temp_edge_map, broken_he3_2);
-        assign_opposite_he(temp_edge_map, broken_he3_3);
-        //add back new faces and new halfedges
-        face_count += 3;
-        Faces.push_back(new_face_1);
-        Faces.push_back(new_face_2);
-        Faces.push_back(new_face_3);
-        HalfEdges.push_back(broken_he1_1);
-        HalfEdges.push_back(broken_he1_2);
-        HalfEdges.push_back(broken_he1_3);
-        HalfEdges.push_back(broken_he2_1);
-        HalfEdges.push_back(broken_he2_2);
-        HalfEdges.push_back(broken_he2_3);
-        HalfEdges.push_back(broken_he3_1);
-        HalfEdges.push_back(broken_he3_2);
-        HalfEdges.push_back(broken_he3_3);
+void MeshHE::vertex_inside_triangle_connections(HalfEdge *&t, glm::vec2 a_point, bool point_in_dest)
+{
+    MeshFace *f = t->face;
+    f->set_delete();
+    int no_of_verts = Vertices.size();
+    Vertices.push_back(std::move(new MeshVertex(no_of_verts + 1, glm::vec3(a_point.x, a_point.y, 0.0))));
+    MeshVertex *new_vert = Vertices[Vertices.size() - 1];
+    HalfEdge *he1, *he2, *he3;
+    he1 = t;
+    he2 = he1->nextHalfEdge;
+    he3 = he2->nextHalfEdge;
+    assert(he3->nextHalfEdge->id == t->id);
+    int he_count = HalfEdges.size();
+    HalfEdge *nhe1 = new HalfEdge(he_count);
+    HalfEdge *nhe2 = new HalfEdge(he_count + 1);
+    HalfEdge *nhe3 = new HalfEdge(he_count + 2);
+    HalfEdge *nhe4 = new HalfEdge(he_count + 3);
+    HalfEdge *nhe5 = new HalfEdge(he_count + 4);
+    HalfEdge *nhe6 = new HalfEdge(he_count + 5);
+    nhe1->vertex = new_vert;
+    nhe4->vertex = new_vert;
+    nhe5->vertex = new_vert;
+    nhe2->vertex = he2->vertex;
+    nhe6->vertex = he3->vertex;
+    nhe3->vertex = he1->vertex;
+    do_next_prev_connections(he1, nhe2, nhe4);
+    do_next_prev_connections(he2, nhe6, nhe1);
+    do_next_prev_connections(he3, nhe3, nhe5);
+    do_pair_connection(nhe1, nhe2);
+    do_pair_connection(nhe3, nhe4);
+    do_pair_connection(nhe5, nhe6);
+    int face_count = Faces.size();
+    MeshFace *f1 = new MeshFace(face_count);
+    MeshFace *f2 = new MeshFace(face_count + 1);
+    MeshFace *f3 = new MeshFace(face_count + 2);
+    if (point_in_dest)
+    {
+        f1->set_dest_face();
+        f2->set_dest_face();
+        f3->set_dest_face();
     }
+    f1->start_edge = he1;
+    f2->start_edge = he2;
+    f3->start_edge = he3;
+    do_face_connections(he1, f1);
+    do_face_connections(he2, f2);
+    do_face_connections(he3, f3);
+    Faces.push_back(f1);
+    Faces.push_back(f2);
+    Faces.push_back(f3);
+    HalfEdges.push_back(nhe1);
+    HalfEdges.push_back(nhe2);
+    HalfEdges.push_back(nhe3);
+    HalfEdges.push_back(nhe4);
+    HalfEdges.push_back(nhe5);
+    HalfEdges.push_back(nhe6);
+}
+void MeshHE::update_map(std::map<std::pair<unsigned int, unsigned int>, HalfEdge *> &edge_map, HalfEdge *&he)
+{
+    edge_map[std::make_pair(he->vertex->id, he->nextHalfEdge->vertex->id)] = he;
+    he->edge_pair = std::make_pair(he->vertex->id, he->nextHalfEdge->vertex->id);
+}
+void MeshHE::do_face_connections(HalfEdge *&he1, MeshFace *&f)
+{
+    he1->face = f;
+    he1->nextHalfEdge->face = f;
+    he1->nextHalfEdge->nextHalfEdge->face = f;
 }
 
 void MeshHE::assign_opposite_he(std::map<std::pair<unsigned int, unsigned int>, HalfEdge *> &temp_edge_map, HalfEdge *&he)
@@ -283,6 +215,11 @@ void MeshHE::do_next_prev_connections(HalfEdge *&he1, HalfEdge *&he2, HalfEdge *
     he1->prevHalfEdge = he3;
     he2->prevHalfEdge = he1;
     he3->prevHalfEdge = he2;
+}
+void MeshHE::do_pair_connection(HalfEdge *&he1, HalfEdge *&he2)
+{
+    he1->pairHalfEdge = he2;
+    he2->pairHalfEdge = he1;
 }
 
 void MeshHE::get_triangle_positions_from_face(MeshFace *f, std::vector<glm::vec2> &positions)

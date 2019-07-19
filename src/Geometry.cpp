@@ -23,10 +23,10 @@ bool geometry_k::point_in_tri(glm::vec2 pt, glm::vec2 v1, glm::vec2 v2, glm::vec
 
 bool geometry_k::get_line_intersection(glm::vec2 p0, glm::vec2 p1, glm::vec2 p2, glm::vec2 p3, float *i_x, float *i_y)
 {
-    if ((abs(p0.x - p2.x) < epsilon && abs(p0.y - p2.y) < epsilon) || (abs(p3.x - p1.x) < epsilon && abs(p3.y - p1.y) < epsilon))
-    {
-        return false;
-    }
+    // if ((abs(p0.x - p2.x) < epsilon && abs(p0.y - p2.y) < epsilon) || (abs(p3.x - p1.x) < epsilon && abs(p3.y - p1.y) < epsilon))
+    // {
+    //     return false;
+    // }
 
     float s1_x, s1_y, s2_x, s2_y;
     s1_x = p1.x - p0.x;

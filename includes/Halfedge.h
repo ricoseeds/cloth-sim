@@ -124,6 +124,8 @@ public:
     void update_map(std::map<std::pair<unsigned int, unsigned int>, HalfEdge *> &edge_map, HalfEdge *&he);
     void vertex_inside_triangle_connections(HalfEdge *&, glm::vec2, bool);
     void do_pair_connection(HalfEdge *&, HalfEdge *&);
+    bool line_half_edge_intersection(HalfEdge *&, glm::vec2 p0, glm::vec2 p1, HalfEdge *&);
+    glm::vec2 find_intersecting_point(glm::vec2, glm::vec2, HalfEdge *&);
 };
 
 #endif

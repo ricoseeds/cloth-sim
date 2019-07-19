@@ -124,10 +124,157 @@ void MeshHE::perform_cut(glm::vec2 p0, glm::vec2 p1)
     HalfEdge *begin_cut = NULL;
     HalfEdge *last_he = NULL;
     determine_start_and_end_faces(begin_cut, last_he, p0, p1); // would be a good idea to decouple
-    vertex_inside_triangle_connections(begin_cut, p0, false);
-    vertex_inside_triangle_connections(last_he, p1, true);
-}
+    HalfEdge *t = NULL;
+    assert(begin_cut != NULL && "beg point inside triangle NF");
+    assert(last_he != NULL && "last point inside triangle NF");
+    // std::cout << "p2 = " << glm::to_string(begin_cut->vertex->position) << " p3 = " << glm::to_string(begin_cut->nextHalfEdge->vertex->position) << "\n";
+    if (line_half_edge_intersection(begin_cut, p0, p1, t))
+    {
+        // std::cout << "AASDASD " << t->face->id;
+        assert(t != NULL && "Unknown case : should intersect with atleast one he in begining face");
+        vertex_inside_triangle_connections(begin_cut, p0, false);
+        vertex_inside_triangle_connections(last_he, p1, true);
+        // cut uptil end face mark
+        bool stop_flag = false;
+        glm::vec2 new_vert_point;
+        // t is defined here
+        int c = 0;
+        while (1)
+        {
+            c++;
+            if (c == 3)
+            {
+                std::cout << "GET MESS \n";
+                print_as_wavefront_obj();
+                std::cout << "END    \n";
 
+                break;
+            }
+            std::cout << " ITER \n";
+            new_vert_point = find_intersecting_point(p0, p1, t);
+            if (t->pairHalfEdge->face->dest_face)
+            {
+                stop_flag = true;
+            }
+            int no_of_verts = Vertices.size();
+            Vertices.push_back(std::move(new MeshVertex(no_of_verts + 1, glm::vec3(new_vert_point.x, new_vert_point.y, 0.0))));
+            MeshVertex *new_vert = Vertices[Vertices.size() - 1];
+            int no_half_edges = HalfEdges.size();
+            HalfEdge *nhe1 = new HalfEdge(no_half_edges);
+            HalfEdge *nhe2 = new HalfEdge(no_half_edges + 1);
+            HalfEdge *nhe3 = new HalfEdge(no_half_edges + 2);
+            HalfEdge *nhe4 = new HalfEdge(no_half_edges + 3);
+            HalfEdge *nhe5 = new HalfEdge(no_half_edges + 4);
+            HalfEdge *nhe6 = new HalfEdge(no_half_edges + 5);
+            HalfEdge *nhe7 = new HalfEdge(no_half_edges + 6);
+            HalfEdge *nhe8 = new HalfEdge(no_half_edges + 7);
+            do_next_prev_connections(nhe1, nhe2, t->nextHalfEdge);
+            do_next_prev_connections(nhe6, nhe5, t->prevHalfEdge);
+            do_next_prev_connections(nhe8, nhe7, t->pairHalfEdge->nextHalfEdge);
+            do_next_prev_connections(nhe3, nhe4, t->pairHalfEdge->prevHalfEdge);
+            do_pair_connection(nhe2, nhe3);
+            do_pair_connection(nhe4, nhe8);
+            do_pair_connection(nhe1, nhe5);
+            do_pair_connection(nhe6, nhe7);
+            t->face->set_delete();
+            t->pairHalfEdge->face->set_delete();
+            int face_count = Faces.size();
+            MeshFace *f1 = new MeshFace(face_count);
+            MeshFace *f2 = new MeshFace(face_count + 1);
+            MeshFace *f3 = new MeshFace(face_count + 2);
+            MeshFace *f4 = new MeshFace(face_count + 3);
+            f1->start_edge = nhe1;
+            f2->start_edge = nhe5;
+            f3->start_edge = nhe3;
+            f4->start_edge = nhe7;
+            do_face_connections(nhe1, f1);
+            do_face_connections(nhe5, f2);
+            do_face_connections(nhe3, f3);
+            do_face_connections(nhe7, f4);
+            nhe1->vertex = t->prevHalfEdge->vertex;
+            nhe2->vertex = new_vert;
+            nhe3->vertex = t->nextHalfEdge->vertex;
+            nhe4->vertex = new_vert;
+            nhe5->vertex = new_vert;
+            nhe6->vertex = t->pairHalfEdge->nextHalfEdge->vertex;
+            nhe7->vertex = new_vert;
+            nhe8->vertex = t->pairHalfEdge->prevHalfEdge->vertex;
+            Faces.push_back(f1);
+            Faces.push_back(f2);
+            Faces.push_back(f3);
+            Faces.push_back(f4);
+            HalfEdges.push_back(nhe1);
+            HalfEdges.push_back(nhe2);
+            HalfEdges.push_back(nhe3);
+            HalfEdges.push_back(nhe4);
+            HalfEdges.push_back(nhe5);
+            HalfEdges.push_back(nhe6);
+            HalfEdges.push_back(nhe7);
+            HalfEdges.push_back(nhe8);
+            if (stop_flag)
+            {
+                std::cout << "STOPPPPPPPPPPPPPPP";
+                break;
+            }
+            t = NULL;
+            bool dummy;
+            if (line_half_edge_intersection(nhe2->pairHalfEdge, p0, p1, t))
+            {
+                std::cout << "ABBBBBBBBBBBBBBBBBB";
+                dummy = true;
+            }
+            else
+            {
+                std::cout << "POOOOOOOOOOOOOOOOOOO";
+
+                dummy = line_half_edge_intersection(nhe6->pairHalfEdge, p0, p1, t);
+            }
+            if (!dummy)
+            {
+                break;
+            }
+        }
+    }
+}
+glm::vec2 MeshHE::find_intersecting_point(glm::vec2 p0, glm::vec2 p1, HalfEdge *&t)
+{
+    glm::vec2 p2 = glm::vec2(t->vertex->position);
+    glm::vec2 p3 = glm::vec2(t->nextHalfEdge->vertex->position);
+    float x, y;
+    if (geometry_k::get_line_intersection(p0, p1, p2, p3, &x, &y))
+    {
+        return glm::vec2(x, y);
+    }
+}
+bool MeshHE::line_half_edge_intersection(HalfEdge *&he, glm::vec2 p0, glm::vec2 p1, HalfEdge *&t)
+{
+    glm::vec2 p2 = glm::vec2(he->vertex->position);
+    glm::vec2 p3 = glm::vec2(he->nextHalfEdge->vertex->position);
+    // std::cout << "p2 = " << glm::to_string(p2) << " p3 = " << glm::to_string(p3) << "\n";
+    float dummy_x, dummy_y;
+    if (geometry_k::get_line_intersection(p0, p1, p2, p3, &dummy_x, &dummy_y))
+    {
+        t = he;
+        return true;
+    }
+    p2 = glm::vec2(he->nextHalfEdge->vertex->position);
+    p3 = glm::vec2(he->nextHalfEdge->nextHalfEdge->vertex->position);
+    // std::cout << "p2 = " << glm::to_string(p2) << " p3 = " << glm::to_string(p3) << "\n";
+    if (geometry_k::get_line_intersection(p0, p1, p2, p3, &dummy_x, &dummy_y))
+    {
+        t = he->nextHalfEdge;
+        return true;
+    }
+    p2 = glm::vec2(he->nextHalfEdge->nextHalfEdge->vertex->position);
+    p3 = glm::vec2(he->nextHalfEdge->nextHalfEdge->nextHalfEdge->vertex->position);
+    // std::cout << "p2 = " << glm::to_string(p2) << " p3 = " << glm::to_string(p3) << "\n";
+    if (geometry_k::get_line_intersection(p0, p1, p2, p3, &dummy_x, &dummy_y))
+    {
+        t = he->nextHalfEdge->nextHalfEdge;
+        return true;
+    }
+    return false;
+}
 void MeshHE::vertex_inside_triangle_connections(HalfEdge *&t, glm::vec2 a_point, bool point_in_dest)
 {
     MeshFace *f = t->face;

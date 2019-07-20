@@ -126,6 +126,7 @@ public:
     void do_pair_connection(HalfEdge *&, HalfEdge *&);
     bool line_half_edge_intersection(HalfEdge *&, glm::vec2 p0, glm::vec2 p1, HalfEdge *&);
     glm::vec2 find_intersecting_point(glm::vec2, glm::vec2, HalfEdge *&);
+    bool check_one_he_line_intersection(HalfEdge *&t, glm::vec2 p0, glm::vec2 p1);
 };
 
 #endif

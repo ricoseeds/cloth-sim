@@ -141,15 +141,19 @@ void MeshHE::perform_cut(glm::vec2 p0, glm::vec2 p1)
         int c = 0;
         while (1)
         {
-            c++;
-            if (c == 3)
-            {
-                std::cout << "GET MESS \n";
-                print_as_wavefront_obj();
-                std::cout << "END    \n";
+            // if (c == 0)
+            // {
+            //     std::cout << "BEG t->id " << t->id << "\n";
+            // }
+            // if (c == 3)
+            // {
+            //     // std::cout << "GET MESS \n";
+            //     // print_as_wavefront_obj();
+            //     // std::cout << "END    \n";
 
-                break;
-            }
+            //     break;
+            // }
+            c++;
             std::cout << " ITER \n";
             new_vert_point = find_intersecting_point(p0, p1, t);
             if (t->pairHalfEdge->face->dest_face)
@@ -158,6 +162,7 @@ void MeshHE::perform_cut(glm::vec2 p0, glm::vec2 p1)
             }
             int no_of_verts = Vertices.size();
             Vertices.push_back(std::move(new MeshVertex(no_of_verts + 1, glm::vec3(new_vert_point.x, new_vert_point.y, 0.0))));
+            std::cout << "NEW VERT : " << glm::to_string(new_vert_point) << "\n";
             MeshVertex *new_vert = Vertices[Vertices.size() - 1];
             int no_half_edges = HalfEdges.size();
             HalfEdge *nhe1 = new HalfEdge(no_half_edges);
@@ -213,28 +218,30 @@ void MeshHE::perform_cut(glm::vec2 p0, glm::vec2 p1)
             HalfEdges.push_back(nhe8);
             if (stop_flag)
             {
-                std::cout << "STOPPPPPPPPPPPPPPP";
                 break;
             }
-            t = NULL;
-            bool dummy;
-            if (line_half_edge_intersection(nhe2->pairHalfEdge, p0, p1, t))
+            if (check_one_he_line_intersection(nhe3->nextHalfEdge->nextHalfEdge, p0, p1))
             {
-                std::cout << "ABBBBBBBBBBBBBBBBBB";
-                dummy = true;
+                t = nhe3->nextHalfEdge->nextHalfEdge;
             }
-            else
+            else if (check_one_he_line_intersection(nhe7->nextHalfEdge, p0, p1))
             {
-                std::cout << "POOOOOOOOOOOOOOOOOOO";
+                t = nhe7->nextHalfEdge;
+            }
 
-                dummy = line_half_edge_intersection(nhe6->pairHalfEdge, p0, p1, t);
-            }
-            if (!dummy)
-            {
-                break;
-            }
         }
     }
+}
+bool MeshHE::check_one_he_line_intersection(HalfEdge *&t, glm::vec2 p0, glm::vec2 p1)
+{
+    glm::vec2 p2 = glm::vec2(t->vertex->position);
+    glm::vec2 p3 = glm::vec2(t->nextHalfEdge->vertex->position);
+    float dummy;
+    if (geometry_k::get_line_intersection(p0, p1, p2, p3, &dummy, &dummy))
+    {
+        return true;
+    }
+    return false;
 }
 glm::vec2 MeshHE::find_intersecting_point(glm::vec2 p0, glm::vec2 p1, HalfEdge *&t)
 {

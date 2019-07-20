@@ -9,7 +9,7 @@ Cloth-Simulation using mass-spring system.
 
 ## Built With
 * OpenGl-3.3
-* c++11
+* c++17
 
 ### Result
 ![alt-text](https://j.gifs.com/1WY7xG.gif)

@@ -30,6 +30,9 @@ public:
     {
         return position;
     }
+    glm::vec3 set_v(glm::vec3 v){
+        this->velocity = v;
+    }
     double get_mass()
     {
         return mass;

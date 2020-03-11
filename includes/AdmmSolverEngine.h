@@ -15,10 +15,13 @@ private:
     Eigen::VectorXd y; // lagrangian multipliers
     Eigen::VectorXd l; // rest lengths
     Eigen::VectorXd k; // spring consts
-    Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>> solver;
+    Eigen::VectorXd x; // spring consts
+    Eigen::VectorXd v; // spring consts
+    Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>>
+        solver;
 
 public:
-    AdmmSolverEngine(double rho, double d_t, Eigen::SparseMatrix<double> &M, Eigen::SparseMatrix<double> &D, Eigen::VectorXd &l, Eigen::VectorXd &k)
+    AdmmSolverEngine(double rho, double d_t, Eigen::SparseMatrix<double> &M, Eigen::SparseMatrix<double> &D, Eigen::VectorXd &l, Eigen::VectorXd &k, Eigen::VectorXd &x, Eigen::VectorXd &v)
     {
         this->rho = rho;
         delta_t = d_t;
@@ -33,11 +36,17 @@ public:
         }
         this->l = l;
         this->k = k;
+        this->x = x;
+        this->v = v;
+        this->z = D * x;
+        int n = z.size();
+        this->y = Eigen::VectorXd::Zero(n);
     }
-    void admm_iter(Eigen::VectorXd &x, Eigen::VectorXd &v, double d_t);
+    void admm_iter(double d_t);
     void resize_M(int, int);
     void resize_D(int, int);
     void set_M(Eigen::SparseMatrix<double> &);
+    Eigen::VectorXd get_x();
     void set_D_and_compute_z(Eigen::SparseMatrix<double> &, Eigen::VectorXd &);
 };
 

@@ -1,6 +1,6 @@
 #include "../includes/AdmmSolverEngine.h"
 
-void AdmmSolverEngine::admm_iter(Eigen::VectorXd &x, Eigen::VectorXd &v, double d_t)
+void AdmmSolverEngine::admm_iter(double d_t)
 {
     Eigen::VectorXd Y = x + (d_t * v);
     Eigen::VectorXd b = (M * Y) + (delta_t * delta_t * D.transpose() * y) + (rho * delta_t * delta_t * D.transpose() * z);
@@ -26,7 +26,11 @@ void AdmmSolverEngine::admm_iter(Eigen::VectorXd &x, Eigen::VectorXd &v, double 
     }
     // now we have updated x and z
     // update the dual variable
-    y = y + rho * (D * x - z);
+    y += (rho * ((D * x) - z));
+}
+Eigen::VectorXd AdmmSolverEngine::get_x()
+{
+    return this->x;
 }
 
 void AdmmSolverEngine::resize_M(int i, int j)

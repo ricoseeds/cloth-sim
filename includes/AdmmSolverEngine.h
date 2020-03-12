@@ -38,11 +38,26 @@ public:
         this->k = k;
         this->x = x;
         this->v = v;
-        this->z = D * x;
-        int n = z.size();
-        this->y = Eigen::VectorXd::Zero(n);
+        z = D * x;
+        std::cout << "X size : " << x.size() << std::endl;
+        this->y = Eigen::VectorXd::Zero(z.size());
+        std::cout << z.size();
+        Eigen::VectorXd Y = x + (d_t * v); //add gravity + 0.5  * g * t * t
+        Eigen::VectorXd b = (M * Y) + (delta_t * delta_t * D.transpose() * y) + (rho * delta_t * delta_t * D.transpose() * z);
+        Eigen::VectorXd x_k_plus_1 = solver.solve(b);
+        if (solver.info() != Eigen::Success)
+        {
+            std::cerr << "solving failed";
+            return;
+        }
+        // std::cout << "X_k+1 size : " << x_k_plus_1 << std::endl;
+        // std::cout << "z : " << z << std::endl;
+
+        // std::cout << x_k_plus_1.size();
+        // std::cout << D.transpose() * D + M;
     }
     void admm_iter(double d_t);
+    void run(double d_t);
     void resize_M(int, int);
     void resize_D(int, int);
     void set_M(Eigen::SparseMatrix<double> &);

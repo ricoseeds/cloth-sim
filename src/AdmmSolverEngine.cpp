@@ -38,7 +38,7 @@ void AdmmSolverEngine::admm_iter(double d_t)
     }
     // now we have updated x and z
     // update the dual variable
-    y += (rho * ((D * x) - z));
+    y += (rho * ( z - (D * x)));
     // std::cout << " y: " << y;
     // std::cout << " z: " << z;
 }

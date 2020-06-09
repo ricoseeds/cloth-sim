@@ -4,7 +4,7 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include "glm/gtx/string_cast.hpp"
 
-const float DEF_FOV = 100.0f; // degrees
+const float DEF_FOV = 10.0f; // degrees
 
 Camera::Camera()
     : mPosition(glm::vec3(0.0f, 0.0f, 0.0f)),
@@ -78,5 +78,6 @@ void OrbitCamera::updateCameraVectors(glm::vec3 offset_cam)
 }
 void OrbitCamera::move(glm::vec3 offsetPos)
 {
+    mPosition += offsetPos;
     updateCameraVectors(offsetPos);
 }

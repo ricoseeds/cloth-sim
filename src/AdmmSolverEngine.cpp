@@ -2,45 +2,38 @@
 
 void AdmmSolverEngine::run(double d_t)
 {
+    Y = x + (d_t * v); //add gravity + 0.5  * g * t * t
+    Eigen::VectorXd old_x = x;
     for (int i = 0; i < 20; i++)
     {
         admm_iter(d_t);
     }
+    v = (x - old_x) * (1.0 / d_t);
+    // u.setZero(); // clear out dual variable
 }
 void AdmmSolverEngine::admm_iter(double d_t)
 {
-    Eigen::VectorXd Y = x + (d_t * v); //add gravity + 0.5  * g * t * t
-    Eigen::VectorXd b = (M * Y) + (delta_t * delta_t * D.transpose() * y) + (rho * delta_t * delta_t * D.transpose() * z);
+    // double w_i = 0.707107;
+    // cout << z.rows();
+    for (int i = 0; i < z.rows() / 3; i++)
+    {
+        // double w_i = W[3 * i][3 * i];
+        double w_i = W.coeff(3 * i, 3 * i);
+        // matrix.coeff(iRow, iCol);
+
+        // Take the unit vector along D_i x + u_i and multiply it by(w_i ^ 2 || D_i x + u_i || +k l_i) / (w_i ^ 2 + k)
+        Eigen::VectorXd Dix_plus_ui = (D.block(3 * i, 0, 3, x.size()) * x) + u.segment(3 * i, 3);
+        Eigen::VectorXd unit_vect = Dix_plus_ui;
+        unit_vect.normalize();
+        double multiplier = w_i * w_i * Dix_plus_ui.norm() + (l[i] * k[i]);
+        multiplier = multiplier / (double)(k[i] + (w_i * w_i));
+        z.segment(3 * i, 3) = multiplier * unit_vect;
+        u.segment(3 * i, 3) += (D.block(3 * i, 0, 3, x.size()) * x) - z.segment(3 * i, 3);
+    }
+    // update x
+    Eigen::VectorXd b = (M * Y) + (delta_t * delta_t * D.transpose() * W.transpose() * W * (z - u));
     Eigen::VectorXd x_k_plus_1 = solver.solve(b);
-    if (solver.info() != Eigen::Success)
-    {
-        std::cerr << "solving failed";
-        return;
-    }
     x = x_k_plus_1;
-    Eigen::VectorXd zi(3);
-    // std::cout << "Overall z\n"
-    //           << z << std::endl;
-    double scalar_zi, factor_zi;
-    // std::cout << "Chunks of z" << std::endl;
-    for (int i = 0; i < z.rows() / 3; i += 1)
-    {
-        zi = z.segment(3 * i, 3);
-        // std::cout << zi << std::endl;
-        // std::cout << D.block(3 * i, 0, 3, x.size());
-        scalar_zi = (rho * D.block(3 * i, 0, 3, x.size()) * x).norm() + (l[i * 3] * k[i * 3]);
-        scalar_zi = scalar_zi / (k[i] + rho);
-        // //solve for zi
-        factor_zi = (k[3 * i] * ((zi.norm() - l[i * 3]) / zi.norm())) + rho;
-        zi = (rho * D.block(3 * i, 0, 3, x.size()) * x) - y.segment(3 * i, 3);
-        zi = zi / factor_zi;
-        z.segment(3 * i, 3) = zi;
-    }
-    // now we have updated x and z
-    // update the dual variable
-    y += (rho * ( z - (D * x)));
-    // std::cout << " y: " << y;
-    // std::cout << " z: " << z;
 }
 Eigen::VectorXd AdmmSolverEngine::get_x()
 {
@@ -65,4 +58,8 @@ void AdmmSolverEngine::set_D_and_compute_z(Eigen::SparseMatrix<double> &mat, Eig
 {
     D = mat;
     z = D * x;
+}
+void AdmmSolverEngine::update_velocity(Eigen::VectorXd &vel)
+{
+    v = vel;
 }

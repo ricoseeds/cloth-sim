@@ -4,30 +4,33 @@
 #include <Eigen/SparseCholesky>
 #include <vector>
 #include <iostream>
+// #include <fstream>
+using namespace std;
 class AdmmSolverEngine
 {
 private:
-    double rho;
     double delta_t;
-    Eigen::SparseMatrix<double> M, D;
+    Eigen::SparseMatrix<double> M, D, W;
     Eigen::SparseMatrix<double> A;
     Eigen::VectorXd z; // dynamic lengths l(i, j)
-    Eigen::VectorXd y; // lagrangian multipliers
+    Eigen::VectorXd u; // scaled lagrangian multipliers
     Eigen::VectorXd l; // rest lengths
     Eigen::VectorXd k; // spring consts
-    Eigen::VectorXd x; // spring consts
-    Eigen::VectorXd v; // spring consts
+    Eigen::VectorXd x; // pos
+    Eigen::VectorXd v; // vel
+    Eigen::VectorXd Y; // x + d_t * v
     Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>>
         solver;
+    // std::ofstream myfile;
 
 public:
-    AdmmSolverEngine(double rho, double d_t, Eigen::SparseMatrix<double> &M, Eigen::SparseMatrix<double> &D, Eigen::VectorXd &l, Eigen::VectorXd &k, Eigen::VectorXd &x, Eigen::VectorXd &v)
+    AdmmSolverEngine(double d_t, Eigen::SparseMatrix<double> &M, Eigen::SparseMatrix<double> &W, Eigen::SparseMatrix<double> &D, Eigen::VectorXd &l, Eigen::VectorXd &k, Eigen::VectorXd &x, Eigen::VectorXd &v)
     {
-        this->rho = rho;
         delta_t = d_t;
         this->M = M;
         this->D = D;
-        this->A = M + ((rho * delta_t * delta_t) * D.transpose() * D); // pre- computed A for global step
+        this->W = W;
+        this->A = M + ((delta_t * delta_t) * D.transpose() * W.transpose() * W * D); // pre- computed A for global step
         solver.compute(A);
         if (solver.info() != Eigen::Success)
         {
@@ -39,23 +42,27 @@ public:
         this->x = x;
         this->v = v;
         z = D * x;
-        std::cout << "X size : " << x.size() << std::endl;
-        this->y = Eigen::VectorXd::Zero(z.size());
-        std::cout << z.size();
-        Eigen::VectorXd Y = x + (d_t * v); //add gravity + 0.5  * g * t * t
-        Eigen::VectorXd b = (M * Y) + (delta_t * delta_t * D.transpose() * y) + (rho * delta_t * delta_t * D.transpose() * z);
-        Eigen::VectorXd x_k_plus_1 = solver.solve(b);
-        if (solver.info() != Eigen::Success)
-        {
-            std::cerr << "solving failed";
-            return;
-        }
-        // std::cout << "X_k+1 size : " << x_k_plus_1 << std::endl;
-        // std::cout << "z : " << z << std::endl;
-
-        // std::cout << x_k_plus_1.size();
-        // std::cout << D.transpose() * D + M;
+        // std::cout << "X size : " << x.size() << std::endl;
+        this->u = Eigen::VectorXd::Zero(z.size());
+        // cout
+        //     << "x " << endl
+        //     << x << endl;
+        // cout << "v " << endl
+        //      << v << endl;
+        // cout << "M " << endl
+        //      << M << endl;
+        // cout << "D " << endl
+        //      << D << endl;
+        // cout << "W " << endl
+        //      << W << endl;
+        // cout << "l " << endl
+        //      << l << endl;
+        // cout << "K " << endl
+        //      << k << endl;
+        // cout << "A " << endl
+        //      << A << endl;
     }
+    void global_step();
     void admm_iter(double d_t);
     void run(double d_t);
     void resize_M(int, int);
@@ -63,6 +70,7 @@ public:
     void set_M(Eigen::SparseMatrix<double> &);
     Eigen::VectorXd get_x();
     void set_D_and_compute_z(Eigen::SparseMatrix<double> &, Eigen::VectorXd &);
+    void update_velocity(Eigen::VectorXd &);
 };
 
 #endif

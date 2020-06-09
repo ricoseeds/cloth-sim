@@ -12,7 +12,7 @@ int main()
         std::cerr << "GLFW initialization failed" << std::endl;
         return -1;
     }
-    int n = 4; // n_squared number of particles in the mass spring system
+    int n = 2; // n_squared number of particles in the mass spring system
     Gridify *grid;
     grid = new Gridify(n);
     grid->build_connections();
@@ -145,6 +145,7 @@ int main()
     //     admm_obj.run(delta);
     //     std::cout << "after" << std::endl;
     // }
+    std::cout << glm::to_string(particle_positions[0] - particle_positions[1]);
     while (!glfwWindowShouldClose(gWindow))
     {
         static double previousChrono = 0.0;

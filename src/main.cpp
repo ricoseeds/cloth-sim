@@ -3,6 +3,7 @@
 #include "glm/gtx/string_cast.hpp"
 #include <Eigen/Dense>
 #include <Eigen/SparseCholesky>
+#include <cmath>
 typedef Eigen::Triplet<double> T;
 int main()
 {
@@ -12,7 +13,7 @@ int main()
         std::cerr << "GLFW initialization failed" << std::endl;
         return -1;
     }
-    int n = 2; // n_squared number of particles in the mass spring system
+    int n = 5; // n_squared number of particles in the mass spring system
     Gridify *grid;
     grid = new Gridify(n);
     grid->build_connections();
@@ -22,100 +23,96 @@ int main()
     mesh.genCloth(n);
     std::vector<glm::vec3> particle_positions = mesh.get_positions();
 
-    // std::vector<Particle> particles;
-    // int particle_count = 0;
-    // int connections = 0;
-    // // MASS SPRING SETUP
-    // for (int i = 0; i < n; i++)
-    // {
-    //     for (int j = 0; j < n; j++)
-    //     {
-    //         // Particle *particle = new Particle(particle_positions[particle_count]);
-    //         Particle particle(particle_positions[particle_count]);
-    //         if (i == 0 && j == 0)
-    //         {
-    //             particle.set_v(glm::vec3(1.0, 0.0, 0.0));
-    //         }
+    std::vector<Particle> particles;
+    int particle_count = 0;
+    int connections = 0;
+    // MASS SPRING SETUP
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < n; j++)
+        {
+            // Particle *particle = new Particle(particle_positions[particle_count]);
+            Particle particle(particle_positions[particle_count]);
+            if (i == 0 && j == 0)
+            {
+                // particle.set_v(glm::vec3(0.0, -1.0, 0.0));
+            }
 
-    //         if ((i == 0 && j == 0) || (i == 0 && j == n - 1) || (i == n - 1 && j == 0) || (i == n - 1 && j == n - 1)) // for the fixed locations in the particle system
-    //         {
-    //             particle.toggle_fixed();
-    //         }
-    //         for (size_t k = 0; k < conn.cols(); k++)
-    //         {
-    //             if (conn(particle_count, k) > epsilon_)
-    //             {
-    //                 particle.add_spring(particle_count, k, conn(particle_count, k), 10.0f);
-    //                 connections++;
-    //             }
-    //         }
-    //         particles.push_back(particle);
-    //         particle_count++;
-    //     }
-    // }
-    // particle_positions.clear();
-    // Eigen::VectorXd x = VectorXd::Zero(particles.size() * 3);
-    // Eigen::VectorXd l = VectorXd::Zero(connections * 3);
-    // Eigen::VectorXd K = VectorXd::Zero(connections * 3);
-    // Eigen::VectorXd v = VectorXd::Zero(particles.size() * 3);
-    // glm::vec3 pos_, vel_;
-    // Eigen::SparseMatrix<double> D(connections * 3, particles.size() * 3);
-    // Eigen::SparseMatrix<double> M(particles.size() * 3, particles.size() * 3);
-    // std::vector<T> tripletList;
-    // std::vector<T> tripletListM;
-    // int count = 0;
-    // double mass = 2.0;
-    // double bending_const = 0.1;
-    // double normal_spring_const = 0.5;
-    // double rho = 0.1;
-    // for (int i = 0; i < particles.size(); i++)
-    // {
-    //     pos_ = particles[i].get_position();
-    //     vel_ = particles[i].get_velocity();
-    //     x[3 * i] = pos_.x;
-    //     x[(3 * i) + 1] = pos_.y;
-    //     x[(3 * i) + 2] = pos_.z;
-    //     v[3 * i] = vel_.x;
-    //     v[(3 * i) + 1] = vel_.y;
-    //     v[(3 * i) + 2] = vel_.z;
-    //     tripletListM.push_back(T(3 * i, 3 * i, mass));
-    //     tripletListM.push_back(T((3 * i) + 1, (3 * i) + 1, mass));
-    //     tripletListM.push_back(T((3 * i) + 2, (3 * i) + 2, mass));
-    //     for (int k = 0; k < conn.cols(); k++)
-    //     {
-    //         if (conn(i, k) > epsilon_)
-    //         {
-    //             l[count] = conn(i, k);
-    //             l[count + 1] = conn(i, k);
-    //             l[count + 2] = conn(i, k);
-    //             if (conn(i, k) > 1.0) // bending spring const set
-    //             {
-    //                 K[count] = bending_const;
-    //                 K[count + 1] = bending_const;
-    //                 K[count + 2] = bending_const;
-    //             }
-    //             else
-    //             {
-    //                 K[count] = normal_spring_const;
-    //                 K[count + 1] = normal_spring_const;
-    //                 K[count + 2] = normal_spring_const;
-    //             }
-
-    //             tripletList.push_back(T(count, 3 * i, 1.0));
-    //             tripletList.push_back(T(count + 1, (3 * i) + 1, 1.0));
-    //             tripletList.push_back(T(count + 2, (3 * i) + 2, 1.0));
-    //             tripletList.push_back(T(count, 3 * k, -1.0));
-    //             tripletList.push_back(T(count + 1, (3 * k) + 1, -1.0));
-    //             tripletList.push_back(T(count + 2, (3 * k) + 2, -1.0));
-    //             count += 3;
-    //         }
-    //     }
-    // }
-    // D.setFromTriplets(tripletList.begin(), tripletList.end());
-    // M.setFromTriplets(tripletListM.begin(), tripletListM.end());
+                       for (size_t k = 0; k < conn.cols(); k++)
+            {
+                if (conn(particle_count, k) > epsilon_)
+                {
+                    particle.add_spring(particle_count, k, conn(particle_count, k), 10.0f);
+                    connections++;
+                }
+            }
+            particles.push_back(particle);
+            particle_count++;
+        }
+    }
+    particle_positions.clear();
+    Eigen::VectorXd x = VectorXd::Zero(particles.size() * 3);
+    Eigen::VectorXd l = VectorXd::Zero(connections);
+    Eigen::VectorXd K = VectorXd::Zero(connections);
+    Eigen::VectorXd v = VectorXd::Zero(particles.size() * 3);
+    glm::vec3 pos_, vel_;
+    Eigen::SparseMatrix<double> D(connections * 3, particles.size() * 3);
+    Eigen::SparseMatrix<double> M(particles.size() * 3, particles.size() * 3);
+    Eigen::SparseMatrix<double> W(connections * 3, connections * 3);
+    std::vector<T> tripletListD;
+    std::vector<T> tripletListM;
+    std::vector<T> tripletListW;
+    int count = 0;
+    double mass = 2.0;
+    double bending_const = 0.1;
+    double normal_spring_const = 0.5;
+    double wi = sqrt(normal_spring_const);
+    for (int i = 0; i < particles.size(); i++)
+    {
+        pos_ = particles[i].get_position();
+        vel_ = particles[i].get_velocity();
+        x[3 * i] = pos_.x;
+        x[(3 * i) + 1] = pos_.y;
+        x[(3 * i) + 2] = pos_.z;
+        v[3 * i] = vel_.x;
+        v[(3 * i) + 1] = vel_.y;
+        v[(3 * i) + 2] = vel_.z;
+        tripletListM.push_back(T(3 * i, 3 * i, mass));
+        tripletListM.push_back(T((3 * i) + 1, (3 * i) + 1, mass));
+        tripletListM.push_back(T((3 * i) + 2, (3 * i) + 2, mass));
+        for (int k = 0; k < conn.cols(); k++)
+        {
+            if (conn(i, k) > epsilon_)
+            {
+                l[count / 3] = conn(i, k);
+                if (conn(i, k) > 1.0) // bending spring const set
+                {
+                    K[count / 3] = bending_const;
+                }
+                else
+                {
+                    K[count / 3] = normal_spring_const;
+                    tripletListW.push_back(T(count, count, wi));
+                    tripletListW.push_back(T(count + 1, count + 1, wi));
+                    tripletListW.push_back(T(count + 2, count + 2, wi));
+                }
+                tripletListD.push_back(T(count, 3 * i, 1.0));
+                tripletListD.push_back(T(count + 1, (3 * i) + 1, 1.0));
+                tripletListD.push_back(T(count + 2, (3 * i) + 2, 1.0));
+                tripletListD.push_back(T(count, 3 * k, -1.0));
+                tripletListD.push_back(T(count + 1, (3 * k) + 1, -1.0));
+                tripletListD.push_back(T(count + 2, (3 * k) + 2, -1.0));
+                count += 3;
+            }
+        }
+    }
+    D.setFromTriplets(tripletListD.begin(), tripletListD.end());
+    M.setFromTriplets(tripletListM.begin(), tripletListM.end());
+    W.setFromTriplets(tripletListW.begin(), tripletListW.end());
     // std::cout << K;
     // std::cout << M;
     // std::cout << x << std::endl;
+    // std::cout << W << std::endl;
     // std::cout << v << std::endl;
     // std::cout << std::endl
     //           << D;
@@ -145,7 +142,8 @@ int main()
     //     admm_obj.run(delta);
     //     std::cout << "after" << std::endl;
     // }
-    std::cout << glm::to_string(particle_positions[0] - particle_positions[1]);
+    double delta_t = 0.01, delta_acc = 0.0;
+    AdmmSolverEngine admm_obj(delta_t, M, W, D, l, K, x, v);
     while (!glfwWindowShouldClose(gWindow))
     {
         static double previousChrono = 0.0;
@@ -155,12 +153,13 @@ int main()
         {
             mesh.clear_vertices();
             previousChrono = currentChrono;
-            // admm_obj.run(delta);
+            admm_obj.run(delta_t);
             // x = admm_obj.get_x();
             for (int i = 0; i <= particle_positions.size(); i++)
             {
-                // mesh.online_update_vertices(glm::vec3(x[3 * i], x[(3 * i) + 1], x[(3 * i) + 2]));
-                mesh.online_update_vertices(glm::vec3(particle_positions[i].x, particle_positions[i].y, particle_positions[i].z));
+                x = admm_obj.get_x();
+                mesh.online_update_vertices(glm::vec3(x[3 * i], x[(3 * i) + 1], x[(3 * i) + 2]));
+                // mesh.online_update_vertices(glm::vec3(particle_positions[i].x, particle_positions[i].y, particle_positions[i].z));
             }
         }
         mesh.recomputeNormals();

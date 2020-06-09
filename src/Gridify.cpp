@@ -34,22 +34,22 @@ void Gridify::build_connections()
             if (i < n_squared - n - 1 && (i + 1) % n != 0)
             {
                 //right diagonal
-                connx(i, i + n + 1) = 1.4;
+                // connx(i, i + n + 1) = 1.4;
                 // connx(i + n + 1, i) = 1.4;
                 //left diagonal
-                connx(i + 1, i + n) = 1.4;
+                // connx(i + 1, i + n) = 1.4;
                 // connx(i + n, i + 1) = 1.4;
             }
             if ((i + 2) % n != 0 && (i + 1) % n != 0)
             {
                 // horizontal flex
-                connx(i, i + 2) = 2;
+                // connx(i, i + 2) = 2;
                 // connx(i + 2, i) = 2;
             }
             if (i + (2 * n) < n_squared)
             {
                 // verical flex
-                connx(i, i + (2 * n)) = 2;
+                // connx(i, i + (2 * n)) = 2;
                 // connx(i + (2 * n), i) = 2;
             }
         }

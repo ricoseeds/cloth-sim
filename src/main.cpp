@@ -35,10 +35,10 @@ int main()
             Particle particle(particle_positions[particle_count]);
             if (i == 0 && j == 0)
             {
-                // particle.set_v(glm::vec3(0.0, -1.0, 0.0));
+                particle.set_v(glm::vec3(0.0, -1.0, 0.0));
             }
 
-                       for (size_t k = 0; k < conn.cols(); k++)
+            for (size_t k = 0; k < conn.cols(); k++)
             {
                 if (conn(particle_count, k) > epsilon_)
                 {
@@ -132,7 +132,7 @@ int main()
     double currentChrono;
     double delta = 0.01f;
     // AdmmSolverEngine admm_obj(rho, delta, M, D, l, K, x, v);
-    std::cout << "before" << std::endl;
+    // std::cout << "before" << std::endl;
     // std::cout << x << std::endl;
     // while (1)
     // {
@@ -143,6 +143,7 @@ int main()
     //     std::cout << "after" << std::endl;
     // }
     double delta_t = 0.01, delta_acc = 0.0;
+    // std::cout << "x before" << x << std::endl;
     AdmmSolverEngine admm_obj(delta_t, M, W, D, l, K, x, v);
     while (!glfwWindowShouldClose(gWindow))
     {
@@ -155,10 +156,14 @@ int main()
             previousChrono = currentChrono;
             admm_obj.run(delta_t);
             // x = admm_obj.get_x();
-            for (int i = 0; i <= particle_positions.size(); i++)
+            x = admm_obj.get_x();
+            // std::cout << "x after" << x << std::endl;
+            // break;
+
+            // std::cout << x.rows() << endl;
+            for (int i = 0; i < x.rows(); i += 3)
             {
-                x = admm_obj.get_x();
-                mesh.online_update_vertices(glm::vec3(x[3 * i], x[(3 * i) + 1], x[(3 * i) + 2]));
+                mesh.online_update_vertices(glm::vec3(x[i], x[i + 1], x[i + 2]));
                 // mesh.online_update_vertices(glm::vec3(particle_positions[i].x, particle_positions[i].y, particle_positions[i].z));
             }
         }

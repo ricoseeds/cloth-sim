@@ -9,7 +9,7 @@ void AdmmSolverEngine::run(double d_t)
         admm_iter(d_t);
     }
     v = (x - old_x) * (1.0 / d_t);
-    // u.setZero(); // clear out dual variable
+    u.setZero(); // clear out dual variable
 }
 void AdmmSolverEngine::admm_iter(double d_t)
 {
@@ -17,14 +17,13 @@ void AdmmSolverEngine::admm_iter(double d_t)
     // cout << z.rows();
     for (int i = 0; i < z.rows() / 3; i++)
     {
-        // double w_i = W[3 * i][3 * i];
         double w_i = W.coeff(3 * i, 3 * i);
-        // matrix.coeff(iRow, iCol);
-
         // Take the unit vector along D_i x + u_i and multiply it by(w_i ^ 2 || D_i x + u_i || +k l_i) / (w_i ^ 2 + k)
         Eigen::VectorXd Dix_plus_ui = (D.block(3 * i, 0, 3, x.size()) * x) + u.segment(3 * i, 3);
         Eigen::VectorXd unit_vect = Dix_plus_ui;
         unit_vect.normalize();
+        // std::cout << "Dix" << Dix_plus_ui << std::endl
+        //           << "unit " << unit_vect << "" << std::endl;
         double multiplier = w_i * w_i * Dix_plus_ui.norm() + (l[i] * k[i]);
         multiplier = multiplier / (double)(k[i] + (w_i * w_i));
         z.segment(3 * i, 3) = multiplier * unit_vect;

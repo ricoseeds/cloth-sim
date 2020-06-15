@@ -144,7 +144,8 @@ int main()
     // }
     double delta_t = 0.01, delta_acc = 0.0;
     // std::cout << "x before" << x << std::endl;
-    AdmmSolverEngine admm_obj(delta_t, M, W, D, l, K, x, v);
+    double gravity = -9.8;
+    AdmmSolverEngine admm_obj(delta_t, M, W, D, l, K, x, v, gravity);
     while (!glfwWindowShouldClose(gWindow))
     {
         static double previousChrono = 0.0;

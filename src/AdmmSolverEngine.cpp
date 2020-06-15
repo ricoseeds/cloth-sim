@@ -2,7 +2,7 @@
 
 void AdmmSolverEngine::run(double d_t)
 {
-    Y = x + (d_t * v); //add gravity + 0.5  * g * t * t
+    Y = x + (d_t * v) + g * d_t * d_t;
     Eigen::VectorXd old_x = x;
     for (int i = 0; i < 20; i++)
     {

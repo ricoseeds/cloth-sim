@@ -17,6 +17,7 @@ private:
     Eigen::VectorXd l; // rest lengths
     Eigen::VectorXd k; // spring consts
     Eigen::VectorXd x; // pos
+    Eigen::VectorXd g; // gravity
     Eigen::VectorXd v; // vel
     Eigen::VectorXd Y; // x + d_t * v
     Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>>
@@ -24,7 +25,7 @@ private:
     // std::ofstream myfile;
 
 public:
-    AdmmSolverEngine(double d_t, Eigen::SparseMatrix<double> &M, Eigen::SparseMatrix<double> &W, Eigen::SparseMatrix<double> &D, Eigen::VectorXd &l, Eigen::VectorXd &k, Eigen::VectorXd &x, Eigen::VectorXd &v)
+    AdmmSolverEngine(double d_t, Eigen::SparseMatrix<double> &M, Eigen::SparseMatrix<double> &W, Eigen::SparseMatrix<double> &D, Eigen::VectorXd &l, Eigen::VectorXd &k, Eigen::VectorXd &x, Eigen::VectorXd &v, double gravity)
     {
         delta_t = d_t;
         this->M = M;
@@ -44,6 +45,14 @@ public:
         z = D * x;
         // std::cout << "X size : " << x.size() << std::endl;
         this->u = Eigen::VectorXd::Zero(z.size());
+        this->g = Eigen::VectorXd::Zero(x.size());
+        for (int i = 0; i < x.rows(); i += 3)
+        {
+            g[i] = 0.0;
+            g[i + 1] = gravity;
+            g[i + 2] = 0.0;
+        }
+        // cout << "Gravity : " << g << endl;
         // cout
         //     << "x " << endl
         //     << x << endl;

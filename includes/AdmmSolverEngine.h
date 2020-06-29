@@ -12,11 +12,13 @@ private:
     double delta_t;
     Eigen::SparseMatrix<double> M, D, W;
     Eigen::SparseMatrix<double> A;
-    Eigen::VectorXd z;          // dynamic lengths l(i, j)
-    Eigen::VectorXd u;          // scaled lagrangian multipliers
-    Eigen::VectorXd l;          // rest lengths
-    Eigen::VectorXd k;          // spring consts
-    Eigen::VectorXd x;          // pos
+    Eigen::VectorXd z;      // dynamic lengths l(i, j)
+    Eigen::VectorXd u;      // scaled lagrangian multipliers
+    Eigen::VectorXd l;      // rest lengths
+    Eigen::VectorXd k;      // spring consts
+    Eigen::VectorXd x;      // pos
+    Eigen::VectorXd x_star; // pos
+
     Eigen::VectorXd x_attached; // attached pos
     Eigen::VectorXd g;          // gravity
     Eigen::VectorXd v;          // vel
@@ -26,20 +28,26 @@ private:
     // std::ofstream myfile;
 
 public:
-    AdmmSolverEngine(double d_t, Eigen::SparseMatrix<double> &M, Eigen::SparseMatrix<double> &W, Eigen::SparseMatrix<double> &D, Eigen::VectorXd &l, Eigen::VectorXd &k, Eigen::VectorXd &x, Eigen::VectorXd &v, double gravity, Eigen::VectorXd &attached)
+    AdmmSolverEngine(double d_t, Eigen::SparseMatrix<double> &M, Eigen::SparseMatrix<double> &W, Eigen::SparseMatrix<double> &D, Eigen::VectorXd &l, Eigen::VectorXd &k, Eigen::VectorXd &x, Eigen::VectorXd &x_star, Eigen::VectorXd &v, double gravity, Eigen::VectorXd &attached)
     {
         delta_t = d_t;
         this->x_attached = attached;
+        this->x_star = x_star;
         this->M = M;
         this->D = D;
         this->W = W;
         this->A = M + ((delta_t * delta_t) * D.transpose() * W.transpose() * W * D); // pre- computed A for global step
+        // std::cout << "Here A" << A;
+        // std::cout << "Here A TTTTT" << A.transpose();
         solver.compute(A);
+        // std::cout << "Here BBBBB" << A;
         if (solver.info() != Eigen::Success)
         {
             std::cerr << "decomposition failed";
             return;
         }
+        std::cout << "HELLO HELLO HELLO";
+
         this->l = l;
         this->k = k;
         this->x = x;

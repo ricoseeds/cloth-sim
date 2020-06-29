@@ -14,7 +14,7 @@ int main()
         return -1;
     }
     // int n = 5; // n_squared number of particles in the mass spring system
-    int n = 5; // n_squared number of particles in the mass spring system
+    int n = 2; // n_squared number of particles in the mass spring system
     Gridify *grid;
     grid = new Gridify(n);
     grid->build_connections();
@@ -78,22 +78,24 @@ int main()
     }
 
     std::cout << "Number of fixed particles : " << no_of_fixed_particles << std::endl;
-    Eigen::VectorXd x = VectorXd::Zero((particles.size() * 3) + (no_of_fixed_particles * 3));
+    // std::cout << "x_attached : " << x_attached << std::endl;
+    Eigen::VectorXd x = VectorXd::Zero((particles.size() * 3));
     Eigen::VectorXd l = VectorXd::Zero(connections + no_of_fixed_particles);
     Eigen::VectorXd K = VectorXd::Zero(connections + no_of_fixed_particles);
-    Eigen::VectorXd v = VectorXd::Zero((particles.size() * 3) + (no_of_fixed_particles * 3));
+    Eigen::VectorXd v = VectorXd::Zero(x.rows());
     glm::vec3 pos_, vel_;
     Eigen::SparseMatrix<double> D((connections * 3) + (no_of_fixed_particles * 3), x.rows());
     Eigen::SparseMatrix<double> M(x.rows(), x.rows());
     Eigen::SparseMatrix<double> W((connections * 3) + (no_of_fixed_particles * 3), (connections * 3) + (no_of_fixed_particles * 3));
+    Eigen::VectorXd x_star = VectorXd::Zero(D.rows());
     std::vector<T> tripletListD;
     std::vector<T> tripletListM;
     std::vector<T> tripletListW;
     int count = 0;
     double mass = 2.0;
-    double bending_const = 0.1;
-    double normal_spring_const = 0.5;
-    double attached_spring_const = 100.8;
+    double bending_const = 0.1;       //0.1
+    double normal_spring_const = 0.5; //0.5
+    double attached_spring_const = 1000.0;
     double wi = sqrt(normal_spring_const);
     for (int i = 0; i < particles.size(); i++)
     {
@@ -116,6 +118,9 @@ int main()
                 if (conn(i, k) > 1.0) // bending spring const set
                 {
                     K[count / 3] = bending_const;
+                    tripletListW.push_back(T(count, count, wi * 10));
+                    tripletListW.push_back(T(count + 1, count + 1, wi * 10));
+                    tripletListW.push_back(T(count + 2, count + 2, wi * 10));
                 }
                 else
                 {
@@ -134,11 +139,16 @@ int main()
             }
         }
     }
-    x.segment(particles.size() * 3, no_of_fixed_particles * 3) = x_attached;
+    x_star.segment(connections * 3, no_of_fixed_particles * 3) = x_attached;
     K[connections] = attached_spring_const;
     K[connections + 1] = attached_spring_const;
     int shifter = 0;
-    std::cout << "COUNT " << count;
+    std::cout << std::endl
+              << "x roes " << x;
+
+    std::cout << std::endl
+              << "COUNT " << count;
+
     for (int i = 0; i < particles.size(); i++)
     {
         if (particles[i].is_fixed() == true)
@@ -148,16 +158,19 @@ int main()
             tripletListD.push_back(T(count, 3 * i, 1.0));
             tripletListD.push_back(T(count + 1, (3 * i) + 1, 1.0));
             tripletListD.push_back(T(count + 2, (3 * i) + 2, 1.0));
-            tripletListD.push_back(T(count, 3 * particles.size() + shifter, -1.0));
-            tripletListD.push_back(T(count + 1, 3 * particles.size() + 1 + shifter, -1.0));
-            tripletListD.push_back(T(count + 2, 3 * particles.size() + 2 + shifter, -1.0));
-            tripletListM.push_back(T(3 * (particles.size() + shifter / 3), 3 * (particles.size() + shifter / 3), 1));
-            tripletListM.push_back(T((3 * (particles.size() + shifter / 3)) + 1, (3 * (particles.size() + shifter / 3)) + 1, 1));
-            tripletListM.push_back(T((3 * (particles.size() + shifter / 3)) + 2, (3 * (particles.size() + shifter / 3)) + 2, 1));
+            // tripletListD.push_back(T(count, 3 * particles.size() + shifter, -1.0));
+            // tripletListD.push_back(T(count + 1, 3 * particles.size() + 1 + shifter, -1.0));
+            // tripletListD.push_back(T(count + 2, 3 * particles.size() + 2 + shifter, -1.0));
+            // tripletListM.push_back(T(3 * (particles.sizex() + shifter / 3), 3 * (particles.size() + shifter / 3), 1));
+            // tripletListM.push_back(T((3 * (particles.size() + shifter / 3)) + 1, (3 * (particles.size() + shifter / 3)) + 1, 1));
+            // tripletListM.push_back(T((3 * (particles.size() + shifter / 3)) + 2, (3 * (particles.size() + shifter / 3)) + 2, 1));
             int idx = 3 * (connections + (shifter / 3));
-            tripletListW.push_back(T(idx, idx, sqrt(attached_spring_const)));
-            tripletListW.push_back(T(idx + 1, idx + 1, sqrt(attached_spring_const)));
-            tripletListW.push_back(T(idx + 2, idx + 2, sqrt(attached_spring_const)));
+            tripletListW.push_back(T(idx, idx, 100));
+            // tripletListW.push_back(T(idx, idx, sqrt(attached_spring_const)));
+            tripletListW.push_back(T(idx + 1, idx + 1, 100));
+            // tripletListW.push_back(T(idx + 1, idx + 1, sqrt(attached_spring_const)));
+            tripletListW.push_back(T(idx + 2, idx + 2, 100));
+            // tripletListW.push_back(T(idx + 2, idx + 2, sqrt(attached_spring_const)));
             // break;
             count += 3;
             shifter += 3;
@@ -169,13 +182,13 @@ int main()
     W.setFromTriplets(tripletListW.begin(), tripletListW.end());
     // std::cout << "K : " << K;
     // std::cout << "L : " << l;
-    // std::cout << M;
+    std::cout << M;
     // std::cout
     //     << x << std::endl;
-    // std::cout << W << std::endl;
+    std::cout << W << std::endl;
     // std::cout << v << std::endl;
-    std::cout << std::endl
-              << W;
+    // std::cout << std::endl
+    //           << (D * x) - x_star;
     // RENDERING
 
     ShaderProgram lightingShader;
@@ -191,21 +204,10 @@ int main()
     double elapsedChrono;
     double currentChrono;
     double delta = 0.01f;
-    // AdmmSolverEngine admm_obj(rho, delta, M, D, l, K, x, v, x_attached);
-    // std::cout << "before" << std::endl;
-    // std::cout << x << std::endl;
-    // while (1)
-    // {
-    //     admm_obj.run(delta);
-    //     std::cout << "after" << std::endl;
-    //     std::cout << admm_obj.get_x() << std::endl;
-    //     admm_obj.run(delta);
-    //     std::cout << "after" << std::endl;
-    // }
     double delta_t = 0.01, delta_acc = 0.0;
     // std::cout << "x before" << x << std::endl;
     double gravity = -9.8;
-    AdmmSolverEngine admm_obj(delta_t, M, W, D, l, K, x, v, gravity, x_attached);
+    AdmmSolverEngine admm_obj(delta_t, M, W, D, l, K, x, x_star, v, gravity, x_attached);
 
     while (!glfwWindowShouldClose(gWindow))
     {

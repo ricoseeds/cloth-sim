@@ -166,7 +166,7 @@ void glfw_onMouseScroll(GLFWwindow *window, double deltaX, double deltaY)
     double fov = orbitCamera.getFOV() + deltaY * ZOOM_SENSITIVITY;
 
     fov = glm::clamp(fov, 1.0, 120.0);
-    std::cout << fov << std::endl;
+    // std::cout << fov << std::endl;
 
     orbitCamera.setFOV((float)fov);
 }

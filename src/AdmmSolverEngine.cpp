@@ -3,12 +3,14 @@
 void AdmmSolverEngine::run(double d_t)
 {
     Y = x + (d_t * v) + g * d_t * d_t;
+    Y.segment(x.rows() - x_attached.rows(), x_attached.rows()) = x_attached;
     Eigen::VectorXd old_x = x;
     for (int i = 0; i < 20; i++)
     {
         admm_iter(d_t);
     }
     v = (x - old_x) * (1.0 / d_t);
+    v.segment(x.rows() - x_attached.rows(), x_attached.rows()) = Eigen::VectorXd::Zero(x_attached.rows());
     u.setZero(); // clear out dual variable
 }
 void AdmmSolverEngine::admm_iter(double d_t)
@@ -33,6 +35,7 @@ void AdmmSolverEngine::admm_iter(double d_t)
     Eigen::VectorXd b = (M * Y) + (delta_t * delta_t * D.transpose() * W.transpose() * W * (z - u));
     Eigen::VectorXd x_k_plus_1 = solver.solve(b);
     x = x_k_plus_1;
+    x.segment(x.rows() - x_attached.rows(), x_attached.rows()) = x_attached;
 }
 Eigen::VectorXd AdmmSolverEngine::get_x()
 {

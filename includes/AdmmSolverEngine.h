@@ -12,22 +12,24 @@ private:
     double delta_t;
     Eigen::SparseMatrix<double> M, D, W;
     Eigen::SparseMatrix<double> A;
-    Eigen::VectorXd z; // dynamic lengths l(i, j)
-    Eigen::VectorXd u; // scaled lagrangian multipliers
-    Eigen::VectorXd l; // rest lengths
-    Eigen::VectorXd k; // spring consts
-    Eigen::VectorXd x; // pos
-    Eigen::VectorXd g; // gravity
-    Eigen::VectorXd v; // vel
-    Eigen::VectorXd Y; // x + d_t * v
+    Eigen::VectorXd z;          // dynamic lengths l(i, j)
+    Eigen::VectorXd u;          // scaled lagrangian multipliers
+    Eigen::VectorXd l;          // rest lengths
+    Eigen::VectorXd k;          // spring consts
+    Eigen::VectorXd x;          // pos
+    Eigen::VectorXd x_attached; // attached pos
+    Eigen::VectorXd g;          // gravity
+    Eigen::VectorXd v;          // vel
+    Eigen::VectorXd Y;          // x + d_t * v
     Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>>
         solver;
     // std::ofstream myfile;
 
 public:
-    AdmmSolverEngine(double d_t, Eigen::SparseMatrix<double> &M, Eigen::SparseMatrix<double> &W, Eigen::SparseMatrix<double> &D, Eigen::VectorXd &l, Eigen::VectorXd &k, Eigen::VectorXd &x, Eigen::VectorXd &v, double gravity)
+    AdmmSolverEngine(double d_t, Eigen::SparseMatrix<double> &M, Eigen::SparseMatrix<double> &W, Eigen::SparseMatrix<double> &D, Eigen::VectorXd &l, Eigen::VectorXd &k, Eigen::VectorXd &x, Eigen::VectorXd &v, double gravity, Eigen::VectorXd &attached)
     {
         delta_t = d_t;
+        this->x_attached = attached;
         this->M = M;
         this->D = D;
         this->W = W;

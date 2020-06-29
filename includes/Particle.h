@@ -25,12 +25,12 @@ public:
     void toggle_fixed();
     void add_spring(int, int, double, double);
     void unfix();
-    glm::vec3
-    get_position()
+    glm::vec3 get_position()
     {
         return position;
     }
-    glm::vec3 set_v(glm::vec3 v){
+    glm::vec3 set_v(glm::vec3 v)
+    {
         this->velocity = v;
     }
     double get_mass()

@@ -1,5 +1,5 @@
 #include "../includes/Gridify.h"
-
+#include <cmath>
 Gridify::Gridify(int n)
 {
     size = n;
@@ -33,12 +33,12 @@ void Gridify::build_connections()
             }
             if (i < n_squared - n - 1 && (i + 1) % n != 0)
             {
-                //right diagonal
-                connx(i, i + n + 1) = 1.4;
-                connx(i + n + 1, i) = 1.4;
+                // right diagonal
+                connx(i, i + n + 1) = sqrt(2.0);
+                connx(i + n + 1, i) = sqrt(2.0);
                 //left diagonal
-                connx(i + 1, i + n) = 1.4;
-                connx(i + n, i + 1) = 1.4;
+                connx(i + 1, i + n) = sqrt(2.0);
+                connx(i + n, i + 1) = sqrt(2.0);
             }
             if ((i + 2) % n != 0 && (i + 1) % n != 0)
             {

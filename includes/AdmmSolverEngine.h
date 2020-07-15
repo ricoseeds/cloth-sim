@@ -25,11 +25,20 @@ private:
     Eigen::VectorXd Y;          // x + d_t * v
     Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>>
         solver;
+    // for profiling
+    int count_;
+    double local_acc, global_acc;
+    double local_acc_n_steps, global_acc_n_steps;
     // std::ofstream myfile;
 
 public:
     AdmmSolverEngine(double d_t, Eigen::SparseMatrix<double> &M, Eigen::SparseMatrix<double> &W, Eigen::SparseMatrix<double> &D, Eigen::VectorXd &l, Eigen::VectorXd &k, Eigen::VectorXd &x, Eigen::VectorXd &x_star, Eigen::VectorXd &v, double gravity, Eigen::VectorXd &attached)
     {
+        count_ = 10; // profile over 10 admm time steps
+        local_acc = 0.0;
+        global_acc = 0.0;
+        local_acc_n_steps = 0.0;
+        global_acc_n_steps = 0.0;
         delta_t = d_t;
         this->x_attached = attached;
         this->x_star = x_star;
@@ -46,7 +55,6 @@ public:
             std::cerr << "decomposition failed";
             return;
         }
-        std::cout << "HELLO HELLO HELLO";
 
         this->l = l;
         this->k = k;
@@ -59,7 +67,7 @@ public:
         for (int i = 0; i < x.rows(); i += 3)
         {
             g[i] = 0.0;
-            g[i + 1] = gravity;
+            g[i + 1] = gravity / 2;
             g[i + 2] = 0.0;
         }
         // cout << "Gravity : " << g << endl;
@@ -82,7 +90,7 @@ public:
         //      << A << endl;
     }
     void global_step();
-    void admm_iter(double d_t);
+    void admm_iter(double d_t, int itr);
     void run(double d_t);
     void resize_M(int, int);
     void resize_D(int, int);

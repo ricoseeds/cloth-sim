@@ -4,6 +4,7 @@
 #include <Eigen/Dense>
 #include <Eigen/SparseCholesky>
 #include <cmath>
+#include <chrono>
 typedef Eigen::Triplet<double> T;
 int main()
 {
@@ -14,7 +15,7 @@ int main()
         return -1;
     }
     // int n = 5; // n_squared number of particles in the mass spring system
-    int n = 2; // n_squared number of particles in the mass spring system
+    int n = 5; // n_squared number of particles in the mass spring system
     Gridify *grid;
     grid = new Gridify(n);
     grid->build_connections();
@@ -66,7 +67,7 @@ int main()
         {
             no_of_fixed_particles++;
             fixed_positions.push_back(particles[i].get_position());
-            std::cout << "FIXED : " << glm::to_string(particles[i].get_position()) << std::endl;
+            // std::cout << "FIXED : " << glm::to_string(particles[i].get_position()) << std::endl;
         }
     }
     Eigen::VectorXd x_attached = VectorXd::Zero(no_of_fixed_particles * 3);
@@ -77,7 +78,7 @@ int main()
         x_attached[(3 * i) + 2] = fixed_positions[i].z;
     }
 
-    std::cout << "Number of fixed particles : " << no_of_fixed_particles << std::endl;
+    // std::cout << "Number of fixed particles : " << no_of_fixed_particles << std::endl;
     // std::cout << "x_attached : " << x_attached << std::endl;
     Eigen::VectorXd x = VectorXd::Zero((particles.size() * 3));
     Eigen::VectorXd l = VectorXd::Zero(connections + no_of_fixed_particles);
@@ -92,9 +93,9 @@ int main()
     std::vector<T> tripletListM;
     std::vector<T> tripletListW;
     int count = 0;
-    double mass = 2.0;
-    double bending_const = 0.1;       //0.1
-    double normal_spring_const = 0.5; //0.5
+    double mass = 0.3;
+    double bending_const = 1.1;        //0.1
+    double normal_spring_const = 10.5; //0.5
     double attached_spring_const = 1000.0;
     double wi = sqrt(normal_spring_const);
     for (int i = 0; i < particles.size(); i++)
@@ -143,17 +144,17 @@ int main()
     K[connections] = attached_spring_const;
     K[connections + 1] = attached_spring_const;
     int shifter = 0;
-    std::cout << std::endl
-              << "x roes " << x;
+    // std::cout << std::endl
+    //           << "x roes " << x;
 
-    std::cout << std::endl
-              << "COUNT " << count;
+    // std::cout << std::endl
+    //           << "COUNT " << count;
 
     for (int i = 0; i < particles.size(); i++)
     {
         if (particles[i].is_fixed() == true)
         {
-            std::cout << " I " << i << std::endl;
+            // std::cout << " I " << i << std::endl;
 
             tripletListD.push_back(T(count, 3 * i, 1.0));
             tripletListD.push_back(T(count + 1, (3 * i) + 1, 1.0));
@@ -182,10 +183,10 @@ int main()
     W.setFromTriplets(tripletListW.begin(), tripletListW.end());
     // std::cout << "K : " << K;
     // std::cout << "L : " << l;
-    std::cout << M;
+    // std::cout << M;
     // std::cout
     //     << x << std::endl;
-    std::cout << W << std::endl;
+    // std::cout << W << std::endl;
     // std::cout << v << std::endl;
     // std::cout << std::endl
     //           << (D * x) - x_star;
@@ -208,89 +209,100 @@ int main()
     // std::cout << "x before" << x << std::endl;
     double gravity = -9.8;
     AdmmSolverEngine admm_obj(delta_t, M, W, D, l, K, x, x_star, v, gravity, x_attached);
-
-    while (!glfwWindowShouldClose(gWindow))
+    int run_steps = 20;
+    while (run_steps >= 0)
     {
-        static double previousChrono = 0.0;
-        currentChrono = glfwGetTime();
-        elapsedChrono = currentChrono - previousChrono;
-        if (elapsedChrono >= delta)
-        {
-            mesh.clear_vertices();
-            previousChrono = currentChrono;
-            admm_obj.run(delta_t);
-            // x = admm_obj.get_x();
-            x = admm_obj.get_x();
-            // std::cout << "x after" << x << std::endl;
-            // break;
-
-            // std::cout << x.rows() << endl;
-            for (int i = 0; i < x.rows(); i += 3)
-            {
-                mesh.online_update_vertices(glm::vec3(x[i], x[i + 1], x[i + 2]));
-                // mesh.online_update_vertices(glm::vec3(particle_positions[i].x, particle_positions[i].y, particle_positions[i].z));
-            }
-        }
-        mesh.recomputeNormals();
-        showFPS(gWindow);
-        double currentTime = glfwGetTime();
-        double deltaTime = currentTime - lastTime;
-        glfwPollEvents();
-        update(deltaTime);
-        // Clear the screen
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        glm::mat4 model(1.0), view(1.0), projection(1.0);
-
-        // Create the View matrix
-        orbitCamera.setLookAt(glm::vec3(0.0f, 1.0f, 0.0f));
-        orbitCamera.rotate(gYaw, gPitch);
-        // orbitCamera.move(glm::vec3(10.0f, 0.0f, 0.0f));
-        orbitCamera.setRadius(gRadius);
-        view = orbitCamera.getViewMatrix();
-
-        // Create the projection matrix
-        projection = glm::perspective(glm::radians(orbitCamera.getFOV()), (float)gWindowWidth / (float)gWindowHeight, 0.1f, 200.0f);
-
-        // update the view (camera) position
-        glm::vec3 viewPos;
-        viewPos = orbitCamera.getPosition();
-        // std::cout << glm::to_string
-
-        // Must be called BEFORE setting uniforms because setting uniforms is done
-        // on the currently active shader program.
-        set_lighting(lightingShader, view, projection, viewPos);
-
-        for (int i = 0; i < numModels; i++)
-        {
-            model = glm::scale(glm::mat4(1.0), modelScale[i] * 3.0f) * glm::rotate(glm::mat4(1.0), glm::radians((float)(gModelYaw)), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::rotate(glm::mat4(1.0), glm::radians((float)(gModelPitch)), glm::vec3(1.0f, 0.0f, 0.0f)); // * glm::rotate(glm::mat4(1.0), glm::radians((double)angle), glm::vec3(0.0f, 1.0f, 0.0f));
-            lightingShader.setUniform("model", model);
-            // Set material properties
-            lightingShader.setUniform("material.ambient", glm::vec3(0.3f, 0.3f, 0.3f));
-            lightingShader.setUniformSampler("material.diffuseMap", 0);
-            lightingShader.setUniform("material.specular", glm::vec3(0.9f, 0.9f, 0.9f));
-            lightingShader.setUniform("material.shininess", 100.0f);
-            if (gWireframe && i == 0)
-            {
-                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-                // texture[i].bind(0);
-                mesh.draw();
-                // texture[i].unbind(0);
-                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-            }
-            else
-            {
-                texture[i].bind(0);
-                mesh.draw();
-                texture[i].unbind(0);
-            }
-        }
-        // Swap front and back buffers
-        glfwSwapBuffers(gWindow);
-        mac_patch(gWindow);
-        lastTime = currentTime;
+        auto start = chrono::steady_clock::now();
+        admm_obj.run(delta_t);
+        auto end = chrono::steady_clock::now();
+        run_steps--;
     }
-    glfwTerminate();
+
+    // cout << "Overall iteration Elapsed time(ns) : "
+    //      << chrono::duration_cast<chrono::nanoseconds>(end - start).count()
+    //      << " ns" << endl;
+    // while (!glfwWindowShouldClose(gWindow))
+    // {
+    //     static double previousChrono = 0.0;
+    //     currentChrono = glfwGetTime();
+    //     elapsedChrono = currentChrono - previousChrono;
+    //     if (elapsedChrono >= delta)
+    //     {
+    //         mesh.clear_vertices();
+    //         previousChrono = currentChrono;
+    //         admm_obj.run(delta_t);
+    //         // x = admm_obj.get_x();
+    //         x = admm_obj.get_x();
+    //         // std::cout << "x after" << x << std::endl;
+    //         // break;
+
+    //         // std::cout << x.rows() << endl;
+    //         for (int i = 0; i < x.rows(); i += 3)
+    //         {
+    //             mesh.online_update_vertices(glm::vec3(x[i], x[i + 1], x[i + 2]));
+    //             // mesh.online_update_vertices(glm::vec3(particle_positions[i].x, particle_positions[i].y, particle_positions[i].z));
+    //         }
+    //     }
+    //     mesh.recomputeNormals();
+    //     showFPS(gWindow);
+    //     double currentTime = glfwGetTime();
+    //     double deltaTime = currentTime - lastTime;
+    //     glfwPollEvents();
+    //     update(deltaTime);
+    //     // Clear the screen
+    //     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    //     glm::mat4 model(1.0), view(1.0), projection(1.0);
+
+    //     // Create the View matrix
+    //     orbitCamera.setLookAt(glm::vec3(0.0f, 1.0f, 0.0f));
+    //     orbitCamera.rotate(gYaw, gPitch);
+    //     // orbitCamera.move(glm::vec3(10.0f, 0.0f, 0.0f));
+    //     orbitCamera.setRadius(gRadius);
+    //     view = orbitCamera.getViewMatrix();
+
+    //     // Create the projection matrix
+    //     projection = glm::perspective(glm::radians(orbitCamera.getFOV()), (float)gWindowWidth / (float)gWindowHeight, 0.1f, 200.0f);
+
+    //     // update the view (camera) position
+    //     glm::vec3 viewPos;
+    //     viewPos = orbitCamera.getPosition();
+    //     // std::cout << glm::to_string
+
+    //     // Must be called BEFORE setting uniforms because setting uniforms is done
+    //     // on the currently active shader program.
+    //     set_lighting(lightingShader, view, projection, viewPos);
+
+    //     for (int i = 0; i < numModels; i++)
+    //     {
+    //         model = glm::scale(glm::mat4(1.0), modelScale[i] * 3.0f) * glm::rotate(glm::mat4(1.0), glm::radians((float)(gModelYaw)), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::rotate(glm::mat4(1.0), glm::radians((float)(gModelPitch)), glm::vec3(1.0f, 0.0f, 0.0f)); // * glm::rotate(glm::mat4(1.0), glm::radians((double)angle), glm::vec3(0.0f, 1.0f, 0.0f));
+    //         lightingShader.setUniform("model", model);
+    //         // Set material properties
+    //         lightingShader.setUniform("material.ambient", glm::vec3(0.3f, 0.3f, 0.3f));
+    //         lightingShader.setUniformSampler("material.diffuseMap", 0);
+    //         lightingShader.setUniform("material.specular", glm::vec3(0.9f, 0.9f, 0.9f));
+    //         lightingShader.setUniform("material.shininess", 100.0f);
+    //         if (gWireframe && i == 0)
+    //         {
+    //             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    //             // texture[i].bind(0);
+    //             mesh.draw();
+    //             // texture[i].unbind(0);
+    //             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    //         }
+    //         else
+    //         {
+    //             texture[i].bind(0);
+    //             mesh.draw();
+    //             texture[i].unbind(0);
+    //         }
+    //     }
+    //     // Swap front and back buffers
+    //     glfwSwapBuffers(gWindow);
+    //     mac_patch(gWindow);
+    //     lastTime = currentTime;
+    // }
+    // glfwTerminate();
 
     return 0;
 }

@@ -1,30 +1,34 @@
 #include "../includes/AdmmSolverEngine.h"
-
+#include <chrono>
 void AdmmSolverEngine::run(double d_t)
 {
-    // std::cout << "HERE HERE HERE";
     Y = x + (d_t * v) + g * d_t * d_t;
-    // std::cout << "Update UpdateUpdateUpdateUpdateUpdateUpdateUpdate ";
-    // Y.segment(x.rows() - x_attached.rows(), x_attached.rows()) = x_attached;
     Eigen::VectorXd old_x = x;
     for (int i = 0; i < 20; i++)
     {
-        admm_iter(d_t);
+        auto start_ = chrono::steady_clock::now();
+        admm_iter(d_t, i);
+        auto end_ = chrono::steady_clock::now();
+        // cout << "Time elapsed in ADMM iteration <" << i << "> :" << chrono::duration_cast<chrono::nanoseconds>(end_ - start_).count() << endl;
     }
     v = (x - old_x) * (1.0 / d_t);
-    // v.segment(x.rows() - x_attached.rows(), x_attached.rows()) = Eigen::VectorXd::Zero(x_attached.rows());
     u.setZero(); // clear out dual variable
+    count_--;
+    if (count_ == 0)
+    {
+        cout << "local step over 10 iterations =  " << local_acc_n_steps << endl;
+        cout << "global step over 10 iterations =  " << global_acc_n_steps << endl;
+        local_acc_n_steps = 0.0;
+        global_acc_n_steps = 0.0;
+        count_ = 10;
+    }
 }
-void AdmmSolverEngine::admm_iter(double d_t)
+void AdmmSolverEngine::admm_iter(double d_t, int itr)
 {
-    // double w_i = 0.707107;
-    // cout << z.rows();
+    auto start = chrono::steady_clock::now();
     for (int i = 0; i < z.rows() / 3; i++)
     {
-        // std::cout << "RR RR RR";
         double w_i = W.coeff(3 * i, 3 * i);
-        // std::cout << "EE EE EE";
-
         // Take the unit vector along D_i x + u_i and multiply it by(w_i ^ 2 || D_i x + u_i || +k l_i) / (w_i ^ 2 + k)
         Eigen::VectorXd Dix_plus_ui = (D.block(3 * i, 0, 3, x.size()) * x) + u.segment(3 * i, 3);
         Eigen::VectorXd Dix_plus_ui_minus_x_star = Dix_plus_ui - x_star.segment(3 * i, 3);
@@ -37,11 +41,29 @@ void AdmmSolverEngine::admm_iter(double d_t)
         z.segment(3 * i, 3) = multiplier * unit_vect;
         u.segment(3 * i, 3) += (D.block(3 * i, 0, 3, x.size()) * x) - x_star.segment(3 * i, 3) - z.segment(3 * i, 3);
     }
+    auto end = chrono::steady_clock::now();
+    local_acc += chrono::duration_cast<chrono::nanoseconds>(end - start).count() / 1000000.0;
+    if (itr == 19)
+    {
+        cout << "local step : " << local_acc << endl;
+        local_acc_n_steps += local_acc;
+        local_acc = 0.0;
+    }
+
+    // cout << "Time elapsed in local step : " << chrono::duration_cast<chrono::nanoseconds>(end - start).count() / 1000000.0 << endl;
     // update x
+    auto start_ = chrono::steady_clock::now();
     Eigen::VectorXd b = (M * Y) + (delta_t * delta_t * D.transpose() * W.transpose() * W * (x_star + z - u));
-    Eigen::VectorXd x_k_plus_1 = solver.solve(b);
-    x = x_k_plus_1;
-    // x.segment(x.rows() - x_attached.rows(), x_attached.rows()) = x_attached;
+    x = solver.solve(b);
+    auto end_ = chrono::steady_clock::now();
+    // cout << "Time elapsed in Global step : " << chrono::duration_cast<chrono::nanoseconds>(end_ - start_).count() / 1000000.0 << endl;
+    global_acc += chrono::duration_cast<chrono::nanoseconds>(end_ - start_).count() / 1000000.0;
+    if (itr == 19)
+    {
+        cout << "global step : " << global_acc << endl;
+        global_acc_n_steps += global_acc;
+        global_acc = 0.0;
+    }
 }
 Eigen::VectorXd AdmmSolverEngine::get_x()
 {

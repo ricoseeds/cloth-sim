@@ -14,7 +14,7 @@ int main()
         return -1;
     }
     // int n = 5; // n_squared number of particles in the mass spring system
-    int n = 2; // n_squared number of particles in the mass spring system
+    int n = 8; // n_squared number of particles in the mass spring system
     Gridify *grid;
     grid = new Gridify(n);
     grid->build_connections();

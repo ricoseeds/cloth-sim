@@ -23,6 +23,7 @@ private:
     Eigen::VectorXd g;          // gravity
     Eigen::VectorXd v;          // vel
     Eigen::VectorXd Y;          // x + d_t * v
+    Eigen::VectorXd Dix;
     Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>>
         solver;
     // std::ofstream myfile;
@@ -53,6 +54,7 @@ public:
         this->x = x;
         this->v = v;
         z = D * x;
+        Dix = D * x;
         // std::cout << "X size : " << x.size() << std::endl;
         this->u = Eigen::VectorXd::Zero(z.size());
         this->g = Eigen::VectorXd::Zero(x.size());

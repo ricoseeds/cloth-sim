@@ -26,7 +26,8 @@ void AdmmSolverEngine::admm_iter(double d_t)
         // std::cout << "EE EE EE";
 
         // Take the unit vector along D_i x + u_i and multiply it by(w_i ^ 2 || D_i x + u_i || +k l_i) / (w_i ^ 2 + k)
-        Eigen::VectorXd Dix_plus_ui = (D.block(3 * i, 0, 3, x.size()) * x) + u.segment(3 * i, 3);
+        // Eigen::VectorXd Dix_plus_ui = (D.block(3 * i, 0, 3, x.size()) * x) + u.segment(3 * i, 3);
+        Eigen::VectorXd Dix_plus_ui = Dix.segment(3 * i, 3) + u.segment(3 * i, 3);
         Eigen::VectorXd Dix_plus_ui_minus_x_star = Dix_plus_ui - x_star.segment(3 * i, 3);
         Eigen::VectorXd unit_vect = Dix_plus_ui_minus_x_star;
         unit_vect.normalize();
@@ -35,12 +36,13 @@ void AdmmSolverEngine::admm_iter(double d_t)
         double multiplier = w_i * w_i * Dix_plus_ui_minus_x_star.norm() + (l[i] * k[i]);
         multiplier = multiplier / (double)(k[i] + (w_i * w_i));
         z.segment(3 * i, 3) = multiplier * unit_vect;
-        u.segment(3 * i, 3) += (D.block(3 * i, 0, 3, x.size()) * x) - x_star.segment(3 * i, 3) - z.segment(3 * i, 3);
+        u.segment(3 * i, 3) += Dix.segment(3 * i, 3) - x_star.segment(3 * i, 3) - z.segment(3 * i, 3);
     }
     // update x
     Eigen::VectorXd b = (M * Y) + (delta_t * delta_t * D.transpose() * W.transpose() * W * (x_star + z - u));
     Eigen::VectorXd x_k_plus_1 = solver.solve(b);
     x = x_k_plus_1;
+    Dix = D * x;
     // x.segment(x.rows() - x_attached.rows(), x_attached.rows()) = x_attached;
 }
 Eigen::VectorXd AdmmSolverEngine::get_x()

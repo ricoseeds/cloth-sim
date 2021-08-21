@@ -59,8 +59,8 @@ public:
         for (int i = 0; i < x.rows(); i += 3)
         {
             g[i] = 0.0;
-            g[i + 1] = gravity;
-            g[i + 2] = 0.0;
+            g[i + 1] = 0;
+            g[i + 2] = gravity;
         }
         // cout << "Gravity : " << g << endl;
         // cout

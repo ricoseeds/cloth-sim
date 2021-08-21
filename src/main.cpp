@@ -14,7 +14,7 @@ int main()
         return -1;
     }
     // int n = 5; // n_squared number of particles in the mass spring system
-    int n = 2; // n_squared number of particles in the mass spring system
+    int n = 6; // n_squared number of particles in the mass spring system
     Gridify *grid;
     grid = new Gridify(n);
     grid->build_connections();
@@ -41,7 +41,12 @@ int main()
             }
             if (i == 0 && j == 0)
             {
-                particle.set_v(glm::vec3(0.0, -1.0, 0.0));
+                // particle.set_v(glm::vec3(0.0, -1.0, 0.0));
+                particle.toggle_fixed();
+            }
+            if (i == n - 1 && j == 0)
+            {
+                // particle.set_v(glm::vec3(0.0, -1.0, 0.0));
                 particle.toggle_fixed();
             }
 
@@ -66,7 +71,7 @@ int main()
         {
             no_of_fixed_particles++;
             fixed_positions.push_back(particles[i].get_position());
-            std::cout << "FIXED : " << glm::to_string(particles[i].get_position()) << std::endl;
+            // std::cout << "FIXED : " << glm::to_string(particles[i].get_position()) << std::endl;
         }
     }
     Eigen::VectorXd x_attached = VectorXd::Zero(no_of_fixed_particles * 3);
@@ -77,7 +82,7 @@ int main()
         x_attached[(3 * i) + 2] = fixed_positions[i].z;
     }
 
-    std::cout << "Number of fixed particles : " << no_of_fixed_particles << std::endl;
+    // std::cout << "Number of fixed particles : " << no_of_fixed_particles << std::endl;
     // std::cout << "x_attached : " << x_attached << std::endl;
     Eigen::VectorXd x = VectorXd::Zero((particles.size() * 3));
     Eigen::VectorXd l = VectorXd::Zero(connections + no_of_fixed_particles);
@@ -92,9 +97,9 @@ int main()
     std::vector<T> tripletListM;
     std::vector<T> tripletListW;
     int count = 0;
-    double mass = 2.0;
-    double bending_const = 0.1;       //0.1
-    double normal_spring_const = 0.5; //0.5
+    double mass = 1.0 / (double)(n);
+    double bending_const = 0.1 * 10;       //0.1
+    double normal_spring_const = 0.5 * 10; //0.5
     double attached_spring_const = 1000.0;
     double wi = sqrt(normal_spring_const);
     for (int i = 0; i < particles.size(); i++)
@@ -143,17 +148,17 @@ int main()
     K[connections] = attached_spring_const;
     K[connections + 1] = attached_spring_const;
     int shifter = 0;
-    std::cout << std::endl
-              << "x roes " << x;
+    // std::cout << std::endl
+    //           << "x roes " << x;
 
-    std::cout << std::endl
-              << "COUNT " << count;
+    // std::cout << std::endl
+    //           << "COUNT " << count;
 
     for (int i = 0; i < particles.size(); i++)
     {
         if (particles[i].is_fixed() == true)
         {
-            std::cout << " I " << i << std::endl;
+            // std::cout << " I " << i << std::endl;
 
             tripletListD.push_back(T(count, 3 * i, 1.0));
             tripletListD.push_back(T(count + 1, (3 * i) + 1, 1.0));
@@ -182,10 +187,10 @@ int main()
     W.setFromTriplets(tripletListW.begin(), tripletListW.end());
     // std::cout << "K : " << K;
     // std::cout << "L : " << l;
-    std::cout << M;
-    // std::cout
-    //     << x << std::endl;
-    std::cout << W << std::endl;
+    // std::cout << M;
+    // // std::cout
+    // //     << x << std::endl;
+    // std::cout << W << std::endl;
     // std::cout << v << std::endl;
     // std::cout << std::endl
     //           << (D * x) - x_star;
@@ -204,7 +209,7 @@ int main()
     double elapsedChrono;
     double currentChrono;
     double delta = 0.01f;
-    double delta_t = 0.01, delta_acc = 0.0;
+    double delta_t = 0.03, delta_acc = 0.0;
     // std::cout << "x before" << x << std::endl;
     double gravity = -9.8;
     AdmmSolverEngine admm_obj(delta_t, M, W, D, l, K, x, x_star, v, gravity, x_attached);
@@ -263,7 +268,9 @@ int main()
 
         for (int i = 0; i < numModels; i++)
         {
-            model = glm::scale(glm::mat4(1.0), modelScale[i] * 3.0f) * glm::rotate(glm::mat4(1.0), glm::radians((float)(gModelYaw)), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::rotate(glm::mat4(1.0), glm::radians((float)(gModelPitch)), glm::vec3(1.0f, 0.0f, 0.0f)); // * glm::rotate(glm::mat4(1.0), glm::radians((double)angle), glm::vec3(0.0f, 1.0f, 0.0f));
+            model = glm::scale(glm::mat4(1.0), modelScale[i] * 3.0f) * glm::rotate(glm::mat4(1.0), glm::radians((float)(-120.0)), glm::vec3(1.0f, 0.0f, 0.0f));
+            // angle_ += 0.05;
+            // model = glm::scale(glm::mat4(1.0), modelScale[i] * 3.0f) * glm::rotate(glm::mat4(1.0), glm::radians((float)(gModelYaw)), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::rotate(glm::mat4(1.0), glm::radians((float)(gModelPitch)), glm::vec3(1.0f, 0.0f, 0.0f)); // * glm::rotate(glm::mat4(1.0), glm::radians((double)angle), glm::vec3(0.0f, 1.0f, 0.0f));
             lightingShader.setUniform("model", model);
             // Set material properties
             lightingShader.setUniform("material.ambient", glm::vec3(0.3f, 0.3f, 0.3f));

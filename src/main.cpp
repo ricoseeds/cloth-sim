@@ -4,9 +4,15 @@
 #include <Eigen/Dense>
 #include <Eigen/SparseCholesky>
 #include <cmath>
+#include <omp.h>
 typedef Eigen::Triplet<double> T;
 int main()
 {
+#pragma omp parallel
+    {
+        printf("Hello World! \n");
+    }
+
     if (!initOpenGL())
     {
         // An error occured
@@ -49,6 +55,11 @@ int main()
                 // particle.set_v(glm::vec3(0.0, -1.0, 0.0));
                 particle.toggle_fixed();
             }
+            if (i == n - 1 && j == n - 1)
+            {
+                // particle.set_v(glm::vec3(0.0, -1.0, 0.0));
+                particle.toggle_fixed();
+            }
 
             for (size_t k = 0; k < conn.cols(); k++)
             {
@@ -74,6 +85,7 @@ int main()
             // std::cout << "FIXED : " << glm::to_string(particles[i].get_position()) << std::endl;
         }
     }
+    cout << "REAR" << no_of_fixed_particles;
     Eigen::VectorXd x_attached = VectorXd::Zero(no_of_fixed_particles * 3);
     for (int i = 0; i < no_of_fixed_particles; i++)
     {
@@ -98,9 +110,9 @@ int main()
     std::vector<T> tripletListW;
     int count = 0;
     double mass = 1.0 / (double)(n);
-    double bending_const = 0.1 * 10;       //0.1
-    double normal_spring_const = 0.5 * 10; //0.5
-    double attached_spring_const = 1000.0;
+    double bending_const = 0.1 * 10 * 10;       //0.1
+    double normal_spring_const = 0.5 * 10 * 10; //0.5
+    double attached_spring_const = 10000.0;
     double wi = sqrt(normal_spring_const);
     for (int i = 0; i < particles.size(); i++)
     {
@@ -147,6 +159,8 @@ int main()
     x_star.segment(connections * 3, no_of_fixed_particles * 3) = x_attached;
     K[connections] = attached_spring_const;
     K[connections + 1] = attached_spring_const;
+    K[connections + 2] = attached_spring_const;
+    K[connections + 3] = attached_spring_const;
     int shifter = 0;
     // std::cout << std::endl
     //           << "x roes " << x;

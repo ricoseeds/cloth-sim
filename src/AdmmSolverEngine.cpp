@@ -1,5 +1,5 @@
 #include "../includes/AdmmSolverEngine.h"
-
+#include <omp.h>
 void AdmmSolverEngine::run(double d_t)
 {
     // std::cout << "HERE HERE HERE";
@@ -20,6 +20,7 @@ void AdmmSolverEngine::admm_iter(double d_t)
     // double w_i = 0.707107;
     // cout << z.rows();
     Eigen::VectorXd Dx = D * x;
+#pragma omp parallel for
     for (int i = 0; i < z.rows() / 3; i++)
     {
         // std::cout << "RR RR RR";

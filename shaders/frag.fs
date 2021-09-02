@@ -93,8 +93,8 @@ void main()
         outColor += calcPointLightColor(pointLights[i], normal, FragPos, viewDir);  
 
 	// If the light isn't on then just return 0 for diffuse and specular colors
-	if (spotLight.on == 1)
-		outColor += calcSpotLightColor(spotLight, normal, FragPos, viewDir);
+	//if (spotLight.on == 1)
+	//	outColor += calcSpotLightColor(spotLight, normal, FragPos, viewDir);
 
 	frag_color = vec4(ambient + outColor, 1.0f);
 }
@@ -145,32 +145,3 @@ vec3 calcPointLightColor(PointLight light, vec3 normal, vec3 fragPos, vec3 viewD
 	return (diffuse + specular);
 }
 
-//------------------------------------------------------------------------------------------------
-// Calculate the spotlight effect and return the resulting // diffuse and specular color summation
-//------------------------------------------------------------------------------------------------
-vec3 calcSpotLightColor(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
-{
-	vec3 lightDir = normalize(light.position - fragPos);
-	vec3 spotDir  = normalize(light.direction);
-
-	float cosDir = dot(-lightDir, spotDir);  // angle between the lights direction vector and spotlights direction vector
-	float spotIntensity = smoothstep(light.cosOuterCone, light.cosInnerCone, cosDir);
-
-	// Diffuse ----------------------------------------------------------------------------------
-    float NdotL = max(dot(normal, lightDir), 0.0);
-    vec3 diffuse = spotLight.diffuse * NdotL * vec3(texture(material.diffuseMap, TexCoord));
-    
-     // Specular - Blinn-Phong ------------------------------------------------------------------
-	vec3 halfDir = normalize(lightDir + viewDir);
-	float NDotH = max(dot(normal, halfDir), 0.0f);
-	vec3 specular = light.specular * material.specular * pow(NDotH, material.shininess);
-
-	// Attenuation using Kc, Kl, Kq -------------------------------------------------------------
-	float d = length(light.position - FragPos);
-	float attenuation = 1.0f / (light.constant + light.linear * d + light.exponent * (d * d));
-
-	diffuse *= attenuation * spotIntensity;
-	specular *= attenuation * spotIntensity;
-	
-	return (diffuse + specular);
-}

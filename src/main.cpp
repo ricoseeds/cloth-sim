@@ -227,6 +227,8 @@ int main()
     // std::cout << "x before" << x << std::endl;
     double gravity = -9.8;
     AdmmSolverEngine admm_obj(delta_t, M, W, D, l, K, x, x_star, v, gravity, x_attached);
+    fpsCamera.setTargetPos(glm::vec3(0.0, 0.0, 0.0));
+    fpsCamera.setPosition(glm::vec3(0.0, 0.0, 4.0));
 
     while (!glfwWindowShouldClose(gWindow))
     {
@@ -262,18 +264,18 @@ int main()
         glm::mat4 model(1.0), view(1.0), projection(1.0);
 
         // Create the View matrix
-        orbitCamera.setLookAt(glm::vec3(0.0f, 1.0f, 0.0f));
-        orbitCamera.rotate(gYaw, gPitch);
+        // orbitCamera.setLookAt(glm::vec3(0.0f, 1.0f, 0.0f));
+        // orbitCamera.rotate(gYaw, gPitch);
         // orbitCamera.move(glm::vec3(10.0f, 0.0f, 0.0f));
-        orbitCamera.setRadius(gRadius);
-        view = orbitCamera.getViewMatrix();
+        // orbitCamera.setRadius(gRadius);
+        view = fpsCamera.getViewMatrix();
 
         // Create the projection matrix
-        projection = glm::perspective(glm::radians(orbitCamera.getFOV()), (float)gWindowWidth / (float)gWindowHeight, 0.1f, 200.0f);
+        projection = glm::perspective(glm::radians(fpsCamera.getFOV()), (float)gWindowWidth / (float)gWindowHeight, 0.1f, 200.0f);
 
         // update the view (camera) position
         glm::vec3 viewPos;
-        viewPos = orbitCamera.getPosition();
+        viewPos = fpsCamera.getPosition();
         // std::cout << glm::to_string
 
         // Must be called BEFORE setting uniforms because setting uniforms is done

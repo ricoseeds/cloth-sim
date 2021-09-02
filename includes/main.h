@@ -22,7 +22,7 @@ using namespace Eigen;
 // #include "../includes/Halfedge.h"
 
 // Global Variables
-OrbitCamera orbitCamera;
+FPSCamera fpsCamera(glm::vec3(0.0f, 0.0f, 4.0f));
 float gRadius = 4.0f;
 float gYaw = 0.0f;
 float gPitch = 30.0f;
@@ -110,6 +110,8 @@ bool initOpenGL()
     glfwSetFramebufferSizeCallback(gWindow, glfw_onFramebufferSize);
     glfwSetScrollCallback(gWindow, glfw_onMouseScroll);
     glfwSetCursorPosCallback(gWindow, glfw_onMouseMove);
+    glfwSetInputMode(gWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetCursorPos(gWindow, gWindowWidth / 2.0, gWindowHeight / 2.0);
 
     // Hides and grabs cursor, unlimited movement
     // glfwSetInputMode(gWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -163,12 +165,12 @@ void glfw_onFramebufferSize(GLFWwindow *window, int width, int height)
 //-----------------------------------------------------------------------------
 void glfw_onMouseScroll(GLFWwindow *window, double deltaX, double deltaY)
 {
-    double fov = orbitCamera.getFOV() + deltaY * ZOOM_SENSITIVITY;
+    double fov = fpsCamera.getFOV() + deltaY * ZOOM_SENSITIVITY;
 
     fov = glm::clamp(fov, 1.0, 120.0);
     // std::cout << fov << std::endl;
 
-    orbitCamera.setFOV((float)fov);
+    fpsCamera.setFOV((float)fov);
 }
 
 //-----------------------------------------------------------------------------
@@ -178,23 +180,28 @@ void update(double elapsedTime)
 {
     // Camera orientation
     double mouseX, mouseY;
+    glfwGetCursorPos(gWindow, &mouseX, &mouseY);
+    glfwSetInputMode(gWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetCursorPos(gWindow, gWindowWidth / 2.0, gWindowHeight / 2.0);
+    fpsCamera.rotate((float)(gWindowWidth / 2.0 - mouseX) * MOUSE_SENSITIVITY, (float)(gWindowHeight / 2.0 - mouseY) * MOUSE_SENSITIVITY);
 
+    // Forward/backward
     if (glfwGetKey(gWindow, GLFW_KEY_W) == GLFW_PRESS)
-        orbitCamera.move(MOVE_SPEED * (float)elapsedTime * orbitCamera.getLook());
+        fpsCamera.move(MOVE_SPEED * (float)elapsedTime * fpsCamera.getLook());
     else if (glfwGetKey(gWindow, GLFW_KEY_S) == GLFW_PRESS)
-        orbitCamera.move(MOVE_SPEED * (float)elapsedTime * -orbitCamera.getLook());
+        fpsCamera.move(MOVE_SPEED * (float)elapsedTime * -fpsCamera.getLook());
 
     // Strafe left/right
     if (glfwGetKey(gWindow, GLFW_KEY_A) == GLFW_PRESS)
-        orbitCamera.move(MOVE_SPEED * (float)elapsedTime * -orbitCamera.getRight());
+        fpsCamera.move(MOVE_SPEED * (float)elapsedTime * -fpsCamera.getRight());
     else if (glfwGetKey(gWindow, GLFW_KEY_D) == GLFW_PRESS)
-        orbitCamera.move(MOVE_SPEED * (float)elapsedTime * orbitCamera.getRight());
+        fpsCamera.move(MOVE_SPEED * (float)elapsedTime * fpsCamera.getRight());
 
     // Up/down
     if (glfwGetKey(gWindow, GLFW_KEY_Z) == GLFW_PRESS)
-        orbitCamera.move(MOVE_SPEED * (float)elapsedTime * glm::vec3(0.0f, 1.0f, 0.0f));
+        fpsCamera.move(MOVE_SPEED * (float)elapsedTime * glm::vec3(0.0f, 1.0f, 0.0f));
     else if (glfwGetKey(gWindow, GLFW_KEY_X) == GLFW_PRESS)
-        orbitCamera.move(MOVE_SPEED * (float)elapsedTime * -glm::vec3(0.0f, 1.0f, 0.0f));
+        fpsCamera.move(MOVE_SPEED * (float)elapsedTime * -glm::vec3(0.0f, 1.0f, 0.0f));
 }
 
 //-----------------------------------------------------------------------------
@@ -336,21 +343,4 @@ void set_lighting(ShaderProgram lightingShader, glm::mat4 view, glm::mat4 projec
     lightingShader.setUniform("pointLights[2].constant", 1.0f);
     lightingShader.setUniform("pointLights[2].linear", 0.82f);
     lightingShader.setUniform("pointLights[2].exponent", 0.20f);
-
-    // Spot light
-    glm::vec3 spotlightPos = orbitCamera.getPosition();
-    // offset the flash light down a little
-    spotlightPos.y -= 0.5f;
-
-    lightingShader.setUniform("spotLight.ambient", glm::vec3(0.1f, 0.1f, 0.1f));
-    lightingShader.setUniform("spotLight.diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
-    lightingShader.setUniform("spotLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
-    lightingShader.setUniform("spotLight.position", spotlightPos);
-    lightingShader.setUniform("spotLight.direction", orbitCamera.getLook());
-    lightingShader.setUniform("spotLight.cosInnerCone", glm::cos(glm::radians(15.0f)));
-    lightingShader.setUniform("spotLight.cosOuterCone", glm::cos(glm::radians(20.0f)));
-    lightingShader.setUniform("spotLight.constant", 1.0f);
-    lightingShader.setUniform("spotLight.linear", 0.0007f);
-    lightingShader.setUniform("spotLight.exponent", 0.0000017f);
-    lightingShader.setUniform("spotLight.on", gFlashlightOn);
 }
